@@ -13,17 +13,23 @@
 ## Table of Contents
 <details>
 <summary>Install</summary>
+
 - [Homebrew](#homebrew)
+
 </details>
 
 <details>
 <summary>Usage</summary>
+
 - [`commit` command](#commit-command)
+
 </details>
 
 <details>
 <summary>Configuration</summary>
+
 - [Conventional commits](#conventional-commits)
+
 </details>
 
 ## Install
