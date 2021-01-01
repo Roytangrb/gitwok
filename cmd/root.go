@@ -10,12 +10,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile   string
+	isVerbose bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gitwok",
-	Short: "CLI tool with conventional commits, changelog, git hooks all in one",
+	Short: "Configurable CLI with conventional commits, changelog, git hooks all in one",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 
@@ -39,14 +42,11 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
+	// global flags and configuration settings.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is gitwok.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&isVerbose, "verbose", false, "run commands with verbose output")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	// local flags and configuration settings.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
@@ -74,15 +74,17 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		if isVerbose {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}
 	} else {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Println("Config file is not found")
-		} else if _, ok := err.(viper.ConfigParseError); ok {
-			fmt.Println("Config file parse error")
+		if fnfe, ok := err.(viper.ConfigFileNotFoundError); ok {
+			fmt.Println("[Error] ", fnfe.Error())
+		} else if pe, ok := err.(viper.ConfigParseError); ok {
+			fmt.Println("[Error] ", pe.Error())
 		} else {
 			fmt.Println("Config file was found but another error was produced")
-			fmt.Println(err)
+			fmt.Println(err.Error())
 		}
 	}
 }
