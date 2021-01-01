@@ -1,0 +1,5 @@
+commit:
+  types:
+    - fix
+    - feat
+    - chore

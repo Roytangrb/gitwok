@@ -24,7 +24,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,7 +43,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gitwok.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is gitwok.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -63,9 +63,11 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".gitwok" (without extension).
+		// Search config in cwd or home directory
+		viper.SetConfigName("gitwok")
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".gitwok")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -73,5 +75,14 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			fmt.Println("Config file is not found")
+		} else if _, ok := err.(viper.ConfigParseError); ok {
+			fmt.Println("Config file parse error")
+		} else {
+			fmt.Println("Config file was found but another error was produced")
+			fmt.Println(err)
+		}
 	}
 }
