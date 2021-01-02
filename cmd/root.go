@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/Roytangrb/gitwok/util"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -14,6 +14,8 @@ var (
 	cfgFile   string
 	isVerbose bool
 )
+
+var logger *util.Logger = util.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -34,7 +36,7 @@ to quickly create a Cobra application.`,
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
 }
@@ -59,7 +61,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 			os.Exit(1)
 		}
 
@@ -75,16 +77,16 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		if isVerbose {
-			fmt.Println("Using config file:", viper.ConfigFileUsed())
+			logger.Info("Using config file", viper.ConfigFileUsed())
 		}
 	} else {
 		if fnfe, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Println("[Error] ", fnfe.Error())
+			logger.Error(fnfe.Error())
 		} else if pe, ok := err.(viper.ConfigParseError); ok {
-			fmt.Println("[Error] ", pe.Error())
+			logger.Error(pe.Error())
 		} else {
-			fmt.Println("Config file was found but another error was produced")
-			fmt.Println(err.Error())
+			logger.Warn("Config file was found but another error was produced")
+			logger.Error(err.Error())
 		}
 	}
 }
