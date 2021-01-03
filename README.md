@@ -6,7 +6,10 @@
 
 <p>
   <a href="https://github.com/Roytangrb/gitwok/blob/main/LICENSE">
-    <img alt="The MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+    <img alt="The MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+  </a>
+  <a href="https://conventionalcommits.org">
+    <img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" />
   </a>
 </p>
 
@@ -31,6 +34,8 @@
 - [Conventional commits](#conventional-commits)
 
 </details>
+
+## Overview
 
 ## Install
 

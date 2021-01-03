@@ -30,6 +30,11 @@ func (l Logger) Error(v ...interface{}) {
 	l.errorLogger.Println(v...)
 }
 
+// Fatal error level log and os.Exit(1)
+func (l Logger) Fatal(v ...interface{}) {
+	l.errorLogger.Fatal(v...)
+}
+
 // InitLogger with level loggers
 func InitLogger(
 	traceHandle io.Writer,

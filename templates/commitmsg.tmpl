@@ -1,0 +1,8 @@
+{{- .Type -}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChange}}!{{end}}: {{.Description}}
+
+{{.Body}}
+{{if .Footers}}
+{{- range .Footers}}
+{{. -}}
+{{end}}
+{{end}}

@@ -11,9 +11,9 @@ var versionCmd = &cobra.Command{
 	Short: "Print GitWok version",
 	Long:  "Print GitWok and its dependencies' versions",
 	Run: func(cmd *cobra.Command, args []string) {
-		printVer()
+		printlnVer(rootCmd.Name(), rootCmd.Version)
 		fmt.Println()
-		printVerDeps()
+		printlnVer("Conventional-commits-spec", "v1.0.0")
 	},
 }
 
@@ -21,10 +21,6 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
-func printVer() {
-	fmt.Println("GitWok v0.0.0")
-}
-
-func printVerDeps() {
-	fmt.Println("Conventional-commits-spec: v1.0.0")
+func printlnVer(name string, semver string) {
+	fmt.Printf("%s %s\n", name, semver)
 }

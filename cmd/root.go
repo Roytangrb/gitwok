@@ -19,8 +19,9 @@ var logger *util.Logger = util.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.St
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gitwok",
-	Short: "Configurable CLI with conventional commits, changelog, git hooks all in one",
+	Use:     "gitwok",
+	Version: "v0.0.0",
+	Short:   "Configurable CLI with conventional commits, changelog, git hooks all in one",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 
@@ -44,12 +45,14 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.SetVersionTemplate("{{.Name}} {{.Version}}\n")
+
 	// global flags and configuration settings.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is gitwok.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&isVerbose, "verbose", false, "run commands with verbose output")
 
 	// local flags and configuration settings.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolP("toggle", "t", false, "help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
