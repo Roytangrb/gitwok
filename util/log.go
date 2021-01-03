@@ -7,12 +7,18 @@ import (
 
 // Logger wrapping 4 level loggers
 type Logger struct {
-	traceLogger, infoLogger, warnLogger, errorLogger *log.Logger
+	VerboseEnabled bool
+	verboseLogger  *log.Logger
+	infoLogger     *log.Logger
+	warnLogger     *log.Logger
+	errorLogger    *log.Logger
 }
 
-// Trace level log
-func (l Logger) Trace(v ...interface{}) {
-	l.traceLogger.Println(v...)
+// Verbose log
+func (l Logger) Verbose(v ...interface{}) {
+	if l.VerboseEnabled {
+		l.verboseLogger.Println(v...)
+	}
 }
 
 // Info level log
@@ -37,15 +43,15 @@ func (l Logger) Fatal(v ...interface{}) {
 
 // InitLogger with level loggers
 func InitLogger(
-	traceHandle io.Writer,
+	verboseHandle io.Writer,
 	infoHandle io.Writer,
 	warnHandle io.Writer,
 	errorHandle io.Writer) *Logger {
 
 	return &Logger{
-		traceLogger: log.New(traceHandle, "[Trace]: ", log.Ldate|log.Ltime),
-		infoLogger:  log.New(infoHandle, "[Info]: ", log.Ldate|log.Ltime),
-		warnLogger:  log.New(warnHandle, "[Warn]: ", log.Ldate|log.Ltime),
-		errorLogger: log.New(errorHandle, "[Error]: ", log.Ldate|log.Ltime),
+		verboseLogger: log.New(verboseHandle, "[Verbose]: ", log.Ldate|log.Ltime),
+		infoLogger:    log.New(infoHandle, "[Info]: ", log.Ldate|log.Ltime),
+		warnLogger:    log.New(warnHandle, "[Warn]: ", log.Ldate|log.Ltime),
+		errorLogger:   log.New(errorHandle, "[Error]: ", log.Ldate|log.Ltime),
 	}
 }

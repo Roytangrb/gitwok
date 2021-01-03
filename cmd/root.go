@@ -22,24 +22,13 @@ var rootCmd = &cobra.Command{
 	Use:     "gitwok",
 	Version: "v0.0.0",
 	Short:   "Configurable CLI with conventional commits, changelog, git hooks all in one",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {},
+	Run:     func(cmd *cobra.Command, args []string) {},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		logger.Error(err)
-		os.Exit(1)
-	}
+	must(rootCmd.Execute())
 }
 
 func init() {
@@ -50,24 +39,20 @@ func init() {
 	// global flags and configuration settings.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is gitwok.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&isVerbose, "verbose", false, "run commands with verbose output")
-
-	// local flags and configuration settings.
-	rootCmd.Flags().BoolP("toggle", "t", false, "help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if isVerbose {
+		logger.VerboseEnabled = true
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			logger.Error(err)
-			os.Exit(1)
-		}
-
+		home := mustStr(homedir.Dir())
 		// Search config in cwd or home directory
 		viper.SetConfigName("gitwok")
 		viper.SetConfigType("yaml")
@@ -79,9 +64,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		if isVerbose {
-			logger.Info("Using config file", viper.ConfigFileUsed())
-		}
+		logger.Verbose("Using config file", viper.ConfigFileUsed())
 	} else {
 		if fnfe, ok := err.(viper.ConfigFileNotFoundError); ok {
 			logger.Error(fnfe.Error())
@@ -92,4 +75,25 @@ func initConfig() {
 			logger.Error(err.Error())
 		}
 	}
+}
+
+func must(err error) {
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+}
+
+func mustStr(val string, err error) string {
+	must(err)
+	return val
+}
+
+func mustStrSlice(val []string, err error) []string {
+	must(err)
+	return val
+}
+
+func mustBool(val bool, err error) bool {
+	must(err)
+	return val
 }

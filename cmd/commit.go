@@ -26,8 +26,8 @@ func (cm CommitMsg) Validate() bool {
 // String format commit msg as conventional commits spec v1.0.0
 func (cm CommitMsg) String() string {
 	var tmplBytes bytes.Buffer
-	tmpl := mustTmpl(template.ParseFiles("templates/commitmsg.tmpl"))
 
+	tmpl := mustTmpl(template.ParseFiles("templates/commitmsg.tmpl")) // filepath relative to main.go
 	must(tmpl.Execute(&tmplBytes, cm))
 
 	return tmplBytes.String()
@@ -39,7 +39,6 @@ var commitCmd = &cobra.Command{
 	Short: "conventional commit",
 	Long:  "pass no flag to use interactive mode",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Info("commit called")
 		// try construct commit msg from flags
 		var cmtMsg CommitMsg
 		// hasAnyFlag := false
@@ -61,32 +60,11 @@ func init() {
 	// type is required msg contructed with flags
 	commitCmd.Flags().StringP("type", "t", "", "required: commit type")
 	commitCmd.Flags().StringP("scope", "s", "", "optional: commit scope")
-	commitCmd.Flags().Bool("breaking", false, "optional: has breaking change")
+	commitCmd.Flags().BoolP("breaking", "k", false, "optional: has breaking change")
 	commitCmd.Flags().StringP("description", "d", "", "required: commit description")
 	commitCmd.Flags().StringP("body", "b", "", "optional: commit body")
 	// TODO: handle footers passed as flags
 	commitCmd.Flags().StringSliceP("footers", "f", []string{}, "optional: commit footers, allow multiple")
-}
-
-func must(err error) {
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
-}
-
-func mustStr(val string, err error) string {
-	must(err)
-	return val
-}
-
-func mustStrSlice(val []string, err error) []string {
-	must(err)
-	return val
-}
-
-func mustBool(val bool, err error) bool {
-	must(err)
-	return val
 }
 
 func mustTmpl(tmpl *template.Template, err error) *template.Template {
