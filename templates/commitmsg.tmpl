@@ -1,7 +1,7 @@
-{{- .Type -}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChange}}!{{end}}: {{.Description}}
-
+{{.Type}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChange}}!{{end}}: {{.Description}}
+{{if .Body}}
 {{.Body}}
-{{if .Footers}}
+{{end}}{{if .Footers}}
 {{- range .Footers}}
 {{. -}}
 {{end}}

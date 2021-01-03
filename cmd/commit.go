@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,27 @@ type CommitMsg struct {
 	Description  string   // required, no line break
 	Body         string   // optional, allow line breaks
 	Footers      []string // optional, allow multiple lines
+}
+
+func makeCommitMsg(
+	cmtType string,
+	scope string,
+	hasBrkChn bool,
+	desc string,
+	body string,
+	footers []string,
+) *CommitMsg {
+	for i, s := range footers {
+		footers[i] = strings.TrimSpace(s)
+	}
+	return &CommitMsg{
+		Type:         strings.TrimSpace(cmtType),
+		Scope:        strings.TrimSpace(scope),
+		HasBrkChange: hasBrkChn,
+		Description:  strings.TrimSpace(desc),
+		Body:         strings.TrimSpace(body),
+		Footers:      footers,
+	}
 }
 
 // Validate commit msg elements
@@ -39,17 +61,17 @@ var commitCmd = &cobra.Command{
 	Short: "conventional commit",
 	Long:  "pass no flag to use interactive mode",
 	Run: func(cmd *cobra.Command, args []string) {
+		cmtType := mustStr(cmd.Flags().GetString("type"))
+		cmtScope := mustStr(cmd.Flags().GetString("scope"))
+		cmtHasBrkChange := mustBool(cmd.Flags().GetBool("breaking"))
+		cmtDescription := mustStr(cmd.Flags().GetString("description"))
+		cmtBody := mustStr(cmd.Flags().GetString("body"))
+		cmtFooters := mustStrSlice(cmd.Flags().GetStringSlice("footers"))
+
 		// try construct commit msg from flags
-		var cmtMsg CommitMsg
-		// hasAnyFlag := false
+		cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
 
-		cmtMsg.Type = mustStr(cmd.Flags().GetString("type"))
-		cmtMsg.Scope = mustStr(cmd.Flags().GetString("scope"))
-		cmtMsg.HasBrkChange = mustBool(cmd.Flags().GetBool("breaking"))
-		cmtMsg.Description = mustStr(cmd.Flags().GetString("description"))
-		cmtMsg.Body = mustStr(cmd.Flags().GetString("body"))
-		cmtMsg.Footers = mustStrSlice(cmd.Flags().GetStringSlice("footers"))
-
+		logger.Verbose("commit msg struct:", cmtMsg)
 		fmt.Print(cmtMsg.ToString("templates/commitmsg.tmpl"))
 	},
 }
