@@ -23,11 +23,11 @@ func (cm CommitMsg) Validate() bool {
 	return true
 }
 
-// String format commit msg as conventional commits spec v1.0.0
-func (cm CommitMsg) String() string {
+// ToString format commit msg as conventional commits spec v1.0.0
+func (cm CommitMsg) ToString(fp string) string {
 	var tmplBytes bytes.Buffer
 
-	tmpl := mustTmpl(template.ParseFiles("templates/commitmsg.tmpl")) // filepath relative to main.go
+	tmpl := mustTmpl(template.ParseFiles(fp)) // filepath relative to main.go
 	must(tmpl.Execute(&tmplBytes, cm))
 
 	return tmplBytes.String()
@@ -50,7 +50,7 @@ var commitCmd = &cobra.Command{
 		cmtMsg.Body = mustStr(cmd.Flags().GetString("body"))
 		cmtMsg.Footers = mustStrSlice(cmd.Flags().GetStringSlice("footers"))
 
-		fmt.Print(cmtMsg.String())
+		fmt.Print(cmtMsg.ToString("templates/commitmsg.tmpl"))
 	},
 }
 
