@@ -9,7 +9,7 @@
     <img alt="Actions Status" src="https://github.com/Roytangrb/gitwok/workflows/Go/badge.svg" />
   </a>
   <a href="https://codecov.io/gh/Roytangrb/gitwok">
-    <img alt="codecov" src="https://codecov.io/gh/Roytangrb/gitwok/branch/master/graph/badge.svg" />
+    <img alt="codecov" src="https://codecov.io/gh/Roytangrb/gitwok/branch/main/graph/badge.svg" />
   </a>
   <a href="https://conventionalcommits.org">
     <img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" />
