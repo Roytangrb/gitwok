@@ -1,8 +1,22 @@
 package cmd
 
-import "testing"
+import (
+	"fmt"
+	"runtime"
+	"testing"
+)
 
 const TestCmtMsgTmplPath = "../templates/commitmsg.tmpl"
+
+// NL is newline represented in os file
+var NL string = DefineNewline()
+
+func DefineNewline() string {
+	if runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
+}
 
 func TestCommitMsgHeader(t *testing.T) {
 	msg1 := makeCommitMsg(" docs ", "", false, "fix typo", "", []string{})           // test type trim
@@ -10,19 +24,19 @@ func TestCommitMsgHeader(t *testing.T) {
 	msg3 := makeCommitMsg("docs", "", true, "fix typo", "", []string{})
 	msg4 := makeCommitMsg("fix", "lib", true, "fix bug", "", []string{})
 
-	if s := msg1.ToString(TestCmtMsgTmplPath); s != "docs: fix typo\n" {
+	if s := msg1.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs: fix typo%s", NL) {
 		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n`, s)
 	}
 
-	if s := msg2.ToString(TestCmtMsgTmplPath); s != "docs(READ ME.md): fix typo\n" {
+	if s := msg2.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs(READ ME.md): fix typo%s", NL) {
 		t.Errorf(`expected: %s, got: %s`, `docs(README.md): fix typo\n`, s)
 	}
 
-	if s := msg3.ToString(TestCmtMsgTmplPath); s != "docs!: fix typo\n" {
+	if s := msg3.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs!: fix typo%s", NL) {
 		t.Errorf(`expected: %s, got: %s`, `docs!: fix typo\n`, s)
 	}
 
-	if s := msg4.ToString(TestCmtMsgTmplPath); s != "fix(lib)!: fix bug\n" {
+	if s := msg4.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("fix(lib)!: fix bug%s", NL) {
 		t.Errorf(`expected: %s, got: %s`, `fix(lib)!: fix bug\n`, s)
 	}
 }
@@ -30,7 +44,7 @@ func TestCommitMsgHeader(t *testing.T) {
 func TestCommitMsgBody(t *testing.T) {
 	msg1 := makeCommitMsg("docs", "", false, "fix typo", "msg body", []string{})
 
-	if s := msg1.ToString(TestCmtMsgTmplPath); s != "docs: fix typo\n\nmsg body\n" {
+	if s := msg1.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs: fix typo%s%smsg body%s", NL, NL, NL) {
 		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n\nmsg body\n`, s)
 	}
 }
