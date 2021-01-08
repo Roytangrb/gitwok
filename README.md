@@ -11,6 +11,9 @@
   <a href="https://codecov.io/gh/Roytangrb/gitwok">
     <img alt="codecov" src="https://codecov.io/gh/Roytangrb/gitwok/branch/main/graph/badge.svg" />
   </a>
+  <a href="https://goreportcard.com/report/github.com/Roytangrb/gitwok">
+    <img alt="goreport" src="https://goreportcard.com/badge/github.com/Roytangrb/gitwok" />
+  </a>
   <a href="https://conventionalcommits.org">
     <img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" />
   </a>

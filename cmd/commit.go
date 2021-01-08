@@ -100,9 +100,9 @@ func IsBrkChnFooter(token string) bool {
 
 // ParseFooter return components of a commit msg footer if seperable by ": " or " #"
 // @param f footer without no newlines
-// @return token "" if seperated wrongly
-// @return sep "" if seperated wrongly
-// @return val "" if seperated wrongly
+// @return token "" if separated wrongly
+// @return sep "" if separated wrongly
+// @return val "" if separated wrongly
 func ParseFooter(f string) (token, sep, val string) {
 	if elms := strings.Split(f, FSepColonSpace); len(elms) == 2 {
 		token, sep, val = elms[0], FSepColonSpace, elms[1]
@@ -169,8 +169,8 @@ func (cm CommitMsg) ToString(fp string) string {
 // commitCmd represents the commit command
 var commitCmd = &cobra.Command{
 	Use:   "commit",
-	Short: "conventional commit",
-	Long:  "pass no flag to use interactive mode",
+	Short: "build and make conventional commit",
+	Long:  "Pass no flag to use interactive mode or build commit message with flags",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmtType := mustStr(cmd.Flags().GetString("type"))
 		cmtScope := mustStr(cmd.Flags().GetString("scope"))
@@ -182,21 +182,23 @@ var commitCmd = &cobra.Command{
 		// try construct commit msg from flags
 		cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
 
-		logger.Verbose("commit msg struct:", cmtMsg)
-		fmt.Print(cmtMsg.ToString("templates/commitmsg.tmpl"))
+		if ok, msg := cmtMsg.Validate(); ok {
+			cmtMsgStr := cmtMsg.ToString("templates/commitmsg.tmpl")
+			fmt.Print(cmtMsgStr)
+		} else {
+			logger.Fatal(msg)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(commitCmd)
 
-	// type is required msg contructed with flags
 	commitCmd.Flags().StringP("type", "t", "", "required: commit type")
 	commitCmd.Flags().StringP("scope", "s", "", "optional: commit scope")
 	commitCmd.Flags().BoolP("breaking", "k", false, "optional: has breaking change")
 	commitCmd.Flags().StringP("description", "d", "", "required: commit description")
 	commitCmd.Flags().StringP("body", "b", "", "optional: commit body")
-	// TODO: handle footers passed as flags
 	commitCmd.Flags().StringSliceP("footers", "f", []string{}, "optional: commit footers, allow multiple")
 }
 
