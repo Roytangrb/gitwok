@@ -99,7 +99,12 @@ func TestCommitMsgBody(t *testing.T) {
 }
 
 func TestParseFooter(t *testing.T) {
-	if token, sep, val := ParseFooter("token: value"); token != "token" || sep != FSepColonSpace || val != "value" {
+	if token, sep, val := ParseFooter("token: "); token != "token" || sep != FSepColonSpace || val != "" {
+		t.Error("ParseFooter check failed")
+	}
+
+	// footer's value can have newlines
+	if token, sep, val := ParseFooter("token: value1\nvalue2"); token != "token" || sep != FSepColonSpace || val != "value1\nvalue2" {
 		t.Error("ParseFooter check failed")
 	}
 
@@ -115,21 +120,53 @@ func TestParseFooter(t *testing.T) {
 // TestCommitMsgFooter
 // @spec conventional commits v1.0.0
 // 8.
-//  - (template) One or more footers MAY be provided one blank line after the body
-//  - (validate) Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string
+//  a. (template) One or more footers MAY be provided one blank line after the body
+//  b. (validate) Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string
 // 9. (validate) A footer’s token MUST use `-` in place of whitespace characters
-// 10.
+// 10. footer’s value MAY contain spaces and newlines, and parsing MUST terminate when the next valid footer token/separator pair is observed
 // 12.
 // 16.
 func TestCommitMsgFooter(t *testing.T) {
-	footerAfterBodyMsg := makeCommitMsg("test", "spec 8.", false, "check newline after body", "body", []string{"Acked-by: RT"})
-	if s := footerAfterBodyMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8.): check newline after body%s%sbody%s%sAcked-by: RT%s", "%s", NL) {
-		t.Errorf(`Spec rule 8 check failed, expected: %s, got: %s`, `test(spec 8.): check newline after body\n\nbody\n\nAcked-by: RT\n`, s)
+	// test validation
+	validFts := []string{
+		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChange),
+		"Acked-by: RT",
+		"Reviewed: ", // seperator space should not be trimed if no footer value
+		"fix #1",
 	}
 
-	footerAfterHeaderMsg := makeCommitMsg("test", "spec 8.", false, "check newline after header", "", []string{"Acked-by: RT"})
-	if s := footerAfterHeaderMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8.): check newline after header%s%sAcked-by: RT%s", "%s", NL) {
-		t.Errorf(`Spec rule 8 check failed, expected: %s, got: %s`, `test(spec 8.): check newline after header\n\nAcked-by: RT\n`, s)
+	for _, f := range validFts {
+		validCmtMsg := makeCommitMsg("fix", "spec 8b", false, "test footer", "", []string{f})
+		if ok, msg := validCmtMsg.Validate(); !ok {
+			t.Errorf("Spec rule 8b check failed, footer: %s should be valid, got msg: %s", f, msg)
+		}
+	}
+
+	invalidFts := []string{
+		": some change",        // no token
+		" #1",                  // no token
+		"footer some change",   // no seperator
+		"token 2: some change", // whitespace in token
+		"token	2: some change", // whitespace in token \t
+		"token\n2: some change",   // whitespace in token \n
+		"token\r\n2: some change", // whitespace in token \r\n
+	}
+
+	for _, f := range invalidFts {
+		invalidCmtMsg := makeCommitMsg("fix", "spec 8b", false, "test footer", "", []string{f})
+		if ok, _ := invalidCmtMsg.Validate(); ok {
+			t.Errorf("Spec rule 8b check failed, commit footer: %s should be invalid", f)
+		}
+	}
+
+	footerAfterBodyMsg := makeCommitMsg("test", "spec 8a", false, "check newline after body", "body", []string{"Acked-by: RT"})
+	if s := footerAfterBodyMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8a): check newline after body%s%sbody%s%sAcked-by: RT%s", "%s", NL) {
+		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after body\n\nbody\n\nAcked-by: RT\n`, s)
+	}
+
+	footerAfterHeaderMsg := makeCommitMsg("test", "spec 8a", false, "check newline after header", "", []string{"Acked-by: RT"})
+	if s := footerAfterHeaderMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8a): check newline after header%s%sAcked-by: RT%s", "%s", NL) {
+		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after header\n\nAcked-by: RT\n`, s)
 	}
 }
 

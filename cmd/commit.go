@@ -53,7 +53,14 @@ func makeCommitMsg(
 	footers []string,
 ) *CommitMsg {
 	for i, s := range footers {
-		footers[i] = strings.TrimSpace(s)
+		// seperator space should not be trimed if no footer value
+		if !strings.HasSuffix(s, FSepColonSpace) {
+			s = strings.TrimRightFunc(s, unicode.IsSpace)
+		}
+		if !strings.HasPrefix(s, FSepSpaceSharp) {
+			s = strings.TrimLeftFunc(s, unicode.IsSpace)
+		}
+		footers[i] = s
 	}
 	return &CommitMsg{
 		Type:         strings.TrimSpace(cmtType),
@@ -98,6 +105,8 @@ func ParseFooter(f string) (token, sep, val string) {
 }
 
 // Validate commit msg elements
+// @return valid {bool}
+// @return msg {string} error msg
 func (cm CommitMsg) Validate() (bool, string) {
 	if cm.Type == "" {
 		return false, RequiredType
@@ -117,11 +126,8 @@ func (cm CommitMsg) Validate() (bool, string) {
 
 	if len(cm.Footers) > 0 {
 		for _, f := range cm.Footers {
-			if ContainsNewline(f) {
-				return false, InvalidFooter
-			}
-			token, sep, val := ParseFooter(f)
-			if token == "" || sep == "" || val == "" {
+			token, sep, _ := ParseFooter(f)
+			if token == "" || sep == "" {
 				return false, InvalidFooter
 			}
 			if token != FTokenBrkChange && ContainsWhiteSpace(token) {
