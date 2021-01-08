@@ -21,6 +21,10 @@ const (
 	InvalidScope = "commit scope is invalid"
 	// InvalidDesc error msg of invalid description
 	InvalidDesc = "commit description is invalid"
+	// InvalidBrkChnFTSep error msg of invalid breaking change footer seperator
+	InvalidBrkChnFTSep = "breaking change footer seperator is invalid"
+	// RequiredBrkChnFTDesc error msg of missing breaking footer description
+	RequiredBrkChnFTDesc = "breaking change footer description is required"
 
 	// InvalidFooter error msg of invalid footer
 	InvalidFooter = "commit footer is invalid"
@@ -28,6 +32,8 @@ const (
 	InvalidFooterToken = "commit footer token is invalid"
 	// FTokenBrkChange special footer token
 	FTokenBrkChange = "BREAKING CHANGE"
+	// FTokenBrkChangeAlias FTokenBrkChange alias
+	FTokenBrkChangeAlias = "BREAKING-CHANGE"
 	// FSepColonSpace footer seperator
 	FSepColonSpace = ": "
 	// FSepSpaceSharp footer seperator
@@ -87,6 +93,11 @@ func ContainsWhiteSpace(s string) bool {
 	return false
 }
 
+// IsBrkChnFooter check if token is breaking change footer token
+func IsBrkChnFooter(token string) bool {
+	return token == FTokenBrkChange || token == FTokenBrkChangeAlias
+}
+
 // ParseFooter return components of a commit msg footer if seperable by ": " or " #"
 // @param f footer without no newlines
 // @return token "" if seperated wrongly
@@ -126,12 +137,18 @@ func (cm CommitMsg) Validate() (bool, string) {
 
 	if len(cm.Footers) > 0 {
 		for _, f := range cm.Footers {
-			token, sep, _ := ParseFooter(f)
+			token, sep, val := ParseFooter(f)
 			if token == "" || sep == "" {
 				return false, InvalidFooter
 			}
 			if token != FTokenBrkChange && ContainsWhiteSpace(token) {
 				return false, InvalidFooterToken
+			}
+			if IsBrkChnFooter(token) && sep != FSepColonSpace {
+				return false, InvalidBrkChnFTSep
+			}
+			if IsBrkChnFooter(token) && val == "" {
+				return false, RequiredBrkChnFTDesc
 			}
 		}
 	}

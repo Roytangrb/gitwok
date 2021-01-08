@@ -28,13 +28,15 @@ func TestContainsNewline(t *testing.T) {
 // TestMakeCommitMsg test trim string input
 // - whitespaces including `\r\n` on Windows should be trimmed
 func TestMakeCommitMsg(t *testing.T) {
-	msg := makeCommitMsg(" fix ", " lib ", false, " desc\r\n", " bodyln1\n bodyln2\n", []string{" Acked-by: RT \n", "Review-by: RT2\r\n"})
+	msg := makeCommitMsg(" fix ", " lib ", false, " desc\r\n", " bodyln1\n bodyln2\n", []string{" Acked-by: RT \n", "Review-by: RT2\r\n", " #1", "Reviewed: "})
 	if msg.Type != "fix" ||
 		msg.Scope != "lib" ||
 		msg.Description != "desc" ||
 		msg.Body != "bodyln1\n bodyln2" ||
 		msg.Footers[0] != "Acked-by: RT" ||
-		msg.Footers[1] != "Review-by: RT2" {
+		msg.Footers[1] != "Review-by: RT2" ||
+		msg.Footers[2] != " #1" ||
+		msg.Footers[3] != "Reviewed: " {
 		t.Error("Commit msg string input trim error")
 	}
 }
@@ -124,12 +126,13 @@ func TestParseFooter(t *testing.T) {
 //  b. (validate) Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string
 // 9. (validate) A footer’s token MUST use `-` in place of whitespace characters
 // 10. footer’s value MAY contain spaces and newlines, and parsing MUST terminate when the next valid footer token/separator pair is observed
-// 12.
-// 16.
+// 12. if included as a footer, a breaking change MUST consist of the uppercase text BREAKING CHANGE, followed by a colon, space, and description
+// 16. BREAKING-CHANGE MUST be synonymous with BREAKING CHANGE, when used as a token in a footer.
 func TestCommitMsgFooter(t *testing.T) {
 	// test validation
 	validFts := []string{
 		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChange),
+		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChangeAlias),
 		"Acked-by: RT",
 		"Reviewed: ", // seperator space should not be trimed if no footer value
 		"fix #1",
@@ -148,14 +151,17 @@ func TestCommitMsgFooter(t *testing.T) {
 		"footer some change",   // no seperator
 		"token 2: some change", // whitespace in token
 		"token	2: some change", // whitespace in token \t
-		"token\n2: some change",   // whitespace in token \n
-		"token\r\n2: some change", // whitespace in token \r\n
+		"token\n2: some change",                         // whitespace in token \n
+		"token\r\n2: some change",                       // whitespace in token \r\n
+		fmt.Sprintf("%s: ", FTokenBrkChange),            // breaking change description is required if included in footer
+		fmt.Sprintf("%s: ", FTokenBrkChangeAlias),       // breaking change description is required if included in footer
+		fmt.Sprintf("%s #some change", FTokenBrkChange), // breaking change should use colon space seperator
 	}
 
 	for _, f := range invalidFts {
 		invalidCmtMsg := makeCommitMsg("fix", "spec 8b", false, "test footer", "", []string{f})
-		if ok, _ := invalidCmtMsg.Validate(); ok {
-			t.Errorf("Spec rule 8b check failed, commit footer: %s should be invalid", f)
+		if ok, msg := invalidCmtMsg.Validate(); ok {
+			t.Errorf("Spec rule 8b check failed, commit footer: %s should be invalid with msg: %s", f, msg)
 		}
 	}
 
@@ -169,6 +175,3 @@ func TestCommitMsgFooter(t *testing.T) {
 		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after header\n\nAcked-by: RT\n`, s)
 	}
 }
-
-// TODO: spec 15. The units of information that make up Conventional Commits MUST NOT be treated as case sensitive by implementors, with the exception of BREAKING CHANGE which MUST be uppercase.
-// should BREAKING CHANGE be case-insensitive?
