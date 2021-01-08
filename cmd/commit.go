@@ -40,9 +40,27 @@ func makeCommitMsg(
 	}
 }
 
+// RequiredType error msg of missing type
+const RequiredType = "type is required"
+
+// RequiredDesc error msg of missing description
+const RequiredDesc = "description is required"
+
 // Validate commit msg elements
-func (cm CommitMsg) Validate() bool {
-	return true
+func (cm CommitMsg) Validate() (ok bool, msg string) {
+	ok = false
+	if cm.Type == "" {
+		msg = RequiredType
+		return
+	}
+
+	if cm.Description == "" {
+		msg = RequiredDesc
+		return
+	}
+
+	ok = true
+	return
 }
 
 // ToString format commit msg as conventional commits spec v1.0.0
