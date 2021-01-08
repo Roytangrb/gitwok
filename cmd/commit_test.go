@@ -134,7 +134,7 @@ func TestCommitMsgFooter(t *testing.T) {
 		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChange),
 		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChangeAlias),
 		"Acked-by: RT",
-		"Reviewed: ", // seperator space should not be trimed if no footer value
+		"Reviewed: ", // separator space should not be trimed if no footer value
 		"fix #1",
 	}
 
@@ -148,14 +148,14 @@ func TestCommitMsgFooter(t *testing.T) {
 	invalidFts := []string{
 		": some change",        // no token
 		" #1",                  // no token
-		"footer some change",   // no seperator
+		"footer some change",   // no separator
 		"token 2: some change", // whitespace in token
 		"token	2: some change", // whitespace in token \t
 		"token\n2: some change",                         // whitespace in token \n
 		"token\r\n2: some change",                       // whitespace in token \r\n
 		fmt.Sprintf("%s: ", FTokenBrkChange),            // breaking change description is required if included in footer
 		fmt.Sprintf("%s: ", FTokenBrkChangeAlias),       // breaking change description is required if included in footer
-		fmt.Sprintf("%s #some change", FTokenBrkChange), // breaking change should use colon space seperator
+		fmt.Sprintf("%s #some change", FTokenBrkChange), // breaking change should use colon space separator
 	}
 
 	for _, f := range invalidFts {

@@ -21,8 +21,8 @@ const (
 	InvalidScope = "commit scope is invalid"
 	// InvalidDesc error msg of invalid description
 	InvalidDesc = "commit description is invalid"
-	// InvalidBrkChnFTSep error msg of invalid breaking change footer seperator
-	InvalidBrkChnFTSep = "breaking change footer seperator is invalid"
+	// InvalidBrkChnFTSep error msg of invalid breaking change footer separator
+	InvalidBrkChnFTSep = "breaking change footer separator is invalid"
 	// RequiredBrkChnFTDesc error msg of missing breaking footer description
 	RequiredBrkChnFTDesc = "breaking change footer description is required"
 
@@ -34,9 +34,9 @@ const (
 	FTokenBrkChange = "BREAKING CHANGE"
 	// FTokenBrkChangeAlias FTokenBrkChange alias
 	FTokenBrkChangeAlias = "BREAKING-CHANGE"
-	// FSepColonSpace footer seperator
+	// FSepColonSpace footer separator
 	FSepColonSpace = ": "
-	// FSepSpaceSharp footer seperator
+	// FSepSpaceSharp footer separator
 	FSepSpaceSharp = " #"
 )
 
@@ -59,7 +59,7 @@ func makeCommitMsg(
 	footers []string,
 ) *CommitMsg {
 	for i, s := range footers {
-		// seperator space should not be trimed if no footer value
+		// separator space should not be trimed if no footer value
 		if !strings.HasSuffix(s, FSepColonSpace) {
 			s = strings.TrimRightFunc(s, unicode.IsSpace)
 		}
