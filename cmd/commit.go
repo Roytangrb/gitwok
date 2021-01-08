@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/spf13/cobra"
 )
@@ -20,6 +21,17 @@ const (
 	InvalidScope = "commit scope is invalid"
 	// InvalidDesc error msg of invalid description
 	InvalidDesc = "commit description is invalid"
+
+	// InvalidFooter error msg of invalid footer
+	InvalidFooter = "commit footer is invalid"
+	// InvalidFooterToken error msg of invalid footer
+	InvalidFooterToken = "commit footer token is invalid"
+	// FTokenBrkChange special footer token
+	FTokenBrkChange = "BREAKING CHANGE"
+	// FSepColonSpace footer seperator
+	FSepColonSpace = ": "
+	// FSepSpaceSharp footer seperator
+	FSepSpaceSharp = " #"
 )
 
 // CommitMsg properties
@@ -58,6 +70,33 @@ func ContainsNewline(s string) bool {
 	return strings.Contains(s, "\n") || strings.Contains(s, "\r\n")
 }
 
+// ContainsWhiteSpace check if string contains whitesapces
+func ContainsWhiteSpace(s string) bool {
+	for _, c := range s {
+		if unicode.IsSpace(c) {
+			return true
+		}
+	}
+	return false
+}
+
+// ParseFooter return components of a commit msg footer if seperable by ": " or " #"
+// @param f footer without no newlines
+// @return token "" if seperated wrongly
+// @return sep "" if seperated wrongly
+// @return val "" if seperated wrongly
+func ParseFooter(f string) (token, sep, val string) {
+	if elms := strings.Split(f, FSepColonSpace); len(elms) == 2 {
+		token, sep, val = elms[0], FSepColonSpace, elms[1]
+		return
+	} else if elms := strings.Split(f, FSepSpaceSharp); len(elms) == 2 {
+		token, sep, val = elms[0], FSepSpaceSharp, elms[1]
+		return
+	}
+
+	return "", "", ""
+}
+
 // Validate commit msg elements
 func (cm CommitMsg) Validate() (bool, string) {
 	if cm.Type == "" {
@@ -74,6 +113,21 @@ func (cm CommitMsg) Validate() (bool, string) {
 		return false, RequiredDesc
 	} else if ContainsNewline(cm.Description) {
 		return false, InvalidDesc
+	}
+
+	if len(cm.Footers) > 0 {
+		for _, f := range cm.Footers {
+			if ContainsNewline(f) {
+				return false, InvalidFooter
+			}
+			token, sep, val := ParseFooter(f)
+			if token == "" || sep == "" || val == "" {
+				return false, InvalidFooter
+			}
+			if token != FTokenBrkChange && ContainsWhiteSpace(token) {
+				return false, InvalidFooterToken
+			}
+		}
 	}
 
 	return true, ""

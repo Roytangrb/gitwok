@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,12 @@ func DefineNewline() string {
 		return "\r\n"
 	}
 	return "\n"
+}
+
+func TestContainsNewline(t *testing.T) {
+	if !ContainsNewline(NL) {
+		t.Error("ContainsNewline check failed")
+	}
 }
 
 // TestMakeCommitMsg test trim string input
@@ -84,12 +91,47 @@ func TestCommitMsgHeader(t *testing.T) {
 // @spec conventional commits v1.0.0
 // 6. body MUST begin one blank line after the description
 func TestCommitMsgBody(t *testing.T) {
-	msg1 := makeCommitMsg("docs", "", false, "fix typo", "msg body", []string{})
+	msg1 := makeCommitMsg("docs", "", false, "fix typo", "msg body\nbody line2", []string{})
 
-	if s := msg1.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs: fix typo%s%smsg body%s", NL, NL, NL) {
-		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n\nmsg body\n`, s)
+	if s := msg1.ToString(TestCmtMsgTmplPath); s != fmt.Sprintf("docs: fix typo%s%smsg body\nbody line2%s", NL, NL, NL) {
+		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n\nmsg body\nbody line2\n`, s)
 	}
 }
 
-func TestCommitMsgFooter(t *testing.T) {
+func TestParseFooter(t *testing.T) {
+	if token, sep, val := ParseFooter("token: value"); token != "token" || sep != FSepColonSpace || val != "value" {
+		t.Error("ParseFooter check failed")
+	}
+
+	if token, sep, val := ParseFooter("fix #1"); token != "fix" || sep != FSepSpaceSharp || val != "1" {
+		t.Error("ParseFooter check failed")
+	}
+
+	if token, sep, val := ParseFooter("fix sth"); token != "" || sep != "" || val != "" {
+		t.Error("ParseFooter check failed")
+	}
 }
+
+// TestCommitMsgFooter
+// @spec conventional commits v1.0.0
+// 8.
+//  - (template) One or more footers MAY be provided one blank line after the body
+//  - (validate) Each footer MUST consist of a word token, followed by either a :<space> or <space># separator, followed by a string
+// 9. (validate) A footer’s token MUST use `-` in place of whitespace characters
+// 10.
+// 12.
+// 16.
+func TestCommitMsgFooter(t *testing.T) {
+	footerAfterBodyMsg := makeCommitMsg("test", "spec 8.", false, "check newline after body", "body", []string{"Acked-by: RT"})
+	if s := footerAfterBodyMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8.): check newline after body%s%sbody%s%sAcked-by: RT%s", "%s", NL) {
+		t.Errorf(`Spec rule 8 check failed, expected: %s, got: %s`, `test(spec 8.): check newline after body\n\nbody\n\nAcked-by: RT\n`, s)
+	}
+
+	footerAfterHeaderMsg := makeCommitMsg("test", "spec 8.", false, "check newline after header", "", []string{"Acked-by: RT"})
+	if s := footerAfterHeaderMsg.ToString(TestCmtMsgTmplPath); s != strings.ReplaceAll("test(spec 8.): check newline after header%s%sAcked-by: RT%s", "%s", NL) {
+		t.Errorf(`Spec rule 8 check failed, expected: %s, got: %s`, `test(spec 8.): check newline after header\n\nAcked-by: RT\n`, s)
+	}
+}
+
+// TODO: spec 15. The units of information that make up Conventional Commits MUST NOT be treated as case sensitive by implementors, with the exception of BREAKING CHANGE which MUST be uppercase.
+// should BREAKING CHANGE be case-insensitive?
