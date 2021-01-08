@@ -9,6 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	// RequiredType error msg of missing type
+	RequiredType = "commit type is required"
+	// RequiredDesc error msg of missing description
+	RequiredDesc = "commit description is required"
+	// InvalidType error msg of invalid type
+	InvalidType = "commit type is invalid"
+	// InvalidScope error msg of invalid scope
+	InvalidScope = "commit scope is invalid"
+	// InvalidDesc error msg of invalid description
+	InvalidDesc = "commit description is invalid"
+)
+
 // CommitMsg properties
 type CommitMsg struct {
 	Type         string   // required, preset or config values only
@@ -40,27 +53,30 @@ func makeCommitMsg(
 	}
 }
 
-// RequiredType error msg of missing type
-const RequiredType = "type is required"
-
-// RequiredDesc error msg of missing description
-const RequiredDesc = "description is required"
+// ContainsNewline check if string contains newline chars
+func ContainsNewline(s string) bool {
+	return strings.Contains(s, "\n") || strings.Contains(s, "\r\n")
+}
 
 // Validate commit msg elements
-func (cm CommitMsg) Validate() (ok bool, msg string) {
-	ok = false
+func (cm CommitMsg) Validate() (bool, string) {
 	if cm.Type == "" {
-		msg = RequiredType
-		return
+		return false, RequiredType
+	} else if ContainsNewline(cm.Type) {
+		return false, InvalidType
+	}
+
+	if cm.Scope != "" && ContainsNewline(cm.Scope) {
+		return false, InvalidScope
 	}
 
 	if cm.Description == "" {
-		msg = RequiredDesc
-		return
+		return false, RequiredDesc
+	} else if ContainsNewline(cm.Description) {
+		return false, InvalidDesc
 	}
 
-	ok = true
-	return
+	return true, ""
 }
 
 // ToString format commit msg as conventional commits spec v1.0.0
