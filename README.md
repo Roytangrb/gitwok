@@ -23,6 +23,7 @@
 <details>
 <summary>Install</summary>
 
+- [Go get](#go-get)
 - [Homebrew](#homebrew)
 
 </details>
@@ -38,6 +39,7 @@
 <summary>Configuration</summary>
 
 - [Conventional commits](#conventional-commits)
+- [Conventional changelog](#conventional-changelog)
 
 </details>
 
@@ -45,15 +47,52 @@
 
 ## Install
 
+### Go get
+If you have `Go` setup on your machine, get and install by:
+```
+$ go get github.com/Roytangrb/gitwok@v0.1.0
+```
+`gitwok` executable should be available if `$GOPATH/bin` is already in your `PATH`, otherwise put the binary in one of your `PATH` directories
+
 ### Homebrew
+
+> coming soon
 
 ## Usage
 
 ### `commit` command
 
+#### `flags` mode
+The `gitwok commit` command is used for building the commit message following [conventional commit v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification, follow by executing `git commit -m <msg>`.
+
+You can build the commit message using flags for subcommand `commit`, example: 
+```
+$ gitwok commit -t docs -s readme.md -d "update documentation"
+```
+which commits with a simple and valid message:
+```
+$ docs(readme.md): update documentation
+```
+You can check all flags by `gitwok commit --help`
+
+#### `interactive` mode
+You may also build the commit message using interactively by running 
+```
+$ gitwok commit
+````
+with no flag or argument. You will be prompted for selecting/entering each conventional commit message component.
+
+> coming soon
+
 ## Configuration
 
 ### Conventional commits
+
+> coming soon
+
+### Conventional changelog
+
+> coming soon
 
 ## Reference
 * [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
