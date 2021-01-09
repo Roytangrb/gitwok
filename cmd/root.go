@@ -67,19 +67,19 @@ func initConfig() {
 		logger.Verbose("Using config file", viper.ConfigFileUsed())
 	} else {
 		if fnfe, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logger.Error(fnfe.Error())
+			logger.Error(fnfe)
 		} else if pe, ok := err.(viper.ConfigParseError); ok {
-			logger.Error(pe.Error())
+			logger.Error(pe)
 		} else {
 			logger.Warn("Config file was found but another error was produced")
-			logger.Error(err.Error())
+			logger.Error(err)
 		}
 	}
 }
 
 func must(err error) {
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(err)
 	}
 }
 

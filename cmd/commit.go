@@ -184,7 +184,11 @@ var commitCmd = &cobra.Command{
 
 		if ok, msg := cmtMsg.Validate(); ok {
 			cmtMsgStr := cmtMsg.ToString("templates/commitmsg.tmpl")
-			fmt.Print(cmtMsgStr)
+			if isVerbose {
+				logger.Verbose("Executing git commit -m with msg: ")
+				fmt.Print(cmtMsgStr)
+			}
+			GitCommit(cmtMsgStr)
 		} else {
 			logger.Fatal(msg)
 		}
