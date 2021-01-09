@@ -50,7 +50,7 @@
 ### Go get
 If you have `Go` setup on your machine, get and install by:
 ```
-$ go get github.com/Roytangrb/gitwok@v0.1.0
+$ go get -u github.com/Roytangrb/gitwok
 ```
 `gitwok` executable should be available if `$GOPATH/bin` is already in your `PATH`, otherwise put the binary in one of your `PATH` directories
 
