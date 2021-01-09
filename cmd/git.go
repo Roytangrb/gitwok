@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 )
 
@@ -16,6 +17,8 @@ func GitCommit(msg string) {
 	err := cmd.Run()
 
 	// print output, delay exit on error
-	logger.Info("git commit -m output:", out.String())
+	logger.Info("git commit -m output:")
+	fmt.Println(out.String())
+
 	must(err)
 }
