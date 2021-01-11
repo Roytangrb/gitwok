@@ -172,25 +172,34 @@ var commitCmd = &cobra.Command{
 	Short: "build and make conventional commit",
 	Long:  "Pass no flag to use interactive mode or build commit message with flags",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmtType := mustStr(cmd.Flags().GetString("type"))
-		cmtScope := mustStr(cmd.Flags().GetString("scope"))
-		cmtHasBrkChange := mustBool(cmd.Flags().GetBool("breaking"))
-		cmtDescription := mustStr(cmd.Flags().GetString("description"))
-		cmtBody := mustStr(cmd.Flags().GetString("body"))
-		cmtFooters := mustStrSlice(cmd.Flags().GetStringSlice("footers"))
+		// use flags mode if any flag has been set
+		flagMode := cmd.Flags().NFlag() > 0
 
-		// try construct commit msg from flags
-		cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
+		if flagMode {
+			// readonly local flags
+			cmtType := mustStr(cmd.LocalFlags().GetString("type"))
+			cmtScope := mustStr(cmd.LocalFlags().GetString("scope"))
+			cmtHasBrkChange := mustBool(cmd.LocalFlags().GetBool("breaking"))
+			cmtDescription := mustStr(cmd.LocalFlags().GetString("description"))
+			cmtBody := mustStr(cmd.LocalFlags().GetString("body"))
+			cmtFooters := mustStrSlice(cmd.LocalFlags().GetStringSlice("footers"))
 
-		if ok, msg := cmtMsg.Validate(); ok {
-			cmtMsgStr := cmtMsg.ToString("templates/commitmsg.tmpl")
-			if isVerbose {
-				logger.Verbose("Executing git commit -m with msg: ")
-				fmt.Print(cmtMsgStr)
+			// try construct commit msg from flags
+			cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
+
+			if ok, msg := cmtMsg.Validate(); ok {
+				cmtMsgStr := cmtMsg.ToString("templates/commitmsg.tmpl")
+				if isVerbose {
+					logger.Verbose("Executing git commit -m with msg: ")
+					fmt.Print(cmtMsgStr)
+				}
+				GitCommit(cmtMsgStr)
+			} else {
+				logger.Fatal(msg)
 			}
-			GitCommit(cmtMsgStr)
 		} else {
-			logger.Fatal(msg)
+			// interactive mode
+			fmt.Println("Using interactive mode")
 		}
 	},
 }

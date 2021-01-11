@@ -175,3 +175,29 @@ func TestCommitMsgFooter(t *testing.T) {
 		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after header\n\nAcked-by: RT\n`, s)
 	}
 }
+
+func TestCommitCmdRun(t *testing.T) {
+	// test flags mode functions
+	if err := commitCmd.Flags().Set("type", "fix"); err != nil {
+		t.Error("get string flag error, error expected: nil, got: ", err)
+	}
+
+	if cmtType, err := commitCmd.LocalFlags().GetString("type"); err != nil {
+		t.Error("get string flag error, error expected: nil, got: ", err)
+	} else if cmtType != "fix" {
+		t.Errorf("get string flag error, type expected: %s, got: %s", "fix", cmtType)
+	}
+
+	// test for os.exit(1)
+	// if os.Getenv("ShouldCommitCmdRunCrash") == "1" {
+	// 	commitCmd.Run(commitCmd, []string{})
+	// 	return
+	// }
+	// cmd := exec.Command(os.Args[0], "-test.run=TestCommitCmdRun")
+	// cmd.Env = append(os.Environ(), "ShouldCommitCmdRunCrash=1")
+	// err := cmd.Run()
+	// if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+	// 	return
+	// }
+	// t.Fatalf("TestCommitCmdRun ran with err %v, want exit status 1", err)
+}
