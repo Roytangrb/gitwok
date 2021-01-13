@@ -61,17 +61,16 @@ $ go get -u github.com/Roytangrb/gitwok
 ## Usage
 
 ### `commit` command
+The `gitwok commit` command is used for building the commit message following [conventional commit v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification, followed by executing `git commit -m <msg>`.
 
 #### `flags` mode
-The `gitwok commit` command is used for building the commit message following [conventional commit v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification, follow by executing `git commit -m <msg>`.
-
 You can build the commit message using flags for subcommand `commit`, example: 
 ```
-$ gitwok commit -t docs -s readme.md -d "update documentation"
+$ gitwok commit -t docs -s readme.md -d "commit command usage"
 ```
 which commits with a simple and valid message:
 ```
-$ docs(readme.md): update documentation
+$ docs(readme.md): commit command usage
 ```
 You can check all flags by `gitwok commit --help`
 

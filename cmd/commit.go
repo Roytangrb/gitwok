@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -172,10 +173,17 @@ var commitCmd = &cobra.Command{
 	Short: "build and make conventional commit",
 	Long:  "Pass no flag to use interactive mode or build commit message with flags",
 	Run: func(cmd *cobra.Command, args []string) {
-		// use flags mode if any flag has been set
-		flagMode := cmd.Flags().NFlag() > 0
+		// count local flags set explicitly
+		// cobra issue: https://github.com/spf13/cobra/issues/1315
+		flagCount := 0
+		cmd.LocalFlags().VisitAll(func(f *pflag.Flag) {
+			if f.Changed {
+				flagCount++
+			}
+		})
 
-		if flagMode {
+		// use flags mode if any flag has been set
+		if flagCount > 0 {
 			// readonly local flags
 			cmtType := mustStr(cmd.LocalFlags().GetString("type"))
 			cmtScope := mustStr(cmd.LocalFlags().GetString("scope"))

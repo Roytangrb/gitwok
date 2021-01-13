@@ -36,12 +36,10 @@ func init() {
 
 	rootCmd.SetVersionTemplate("{{.Name}} {{.Version}}\n")
 
-	// global flags and configuration settings.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is gitwok.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&isVerbose, "verbose", false, "run commands with verbose output")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./gitwok.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&isVerbose, "verbose", "v", false, "verbose output")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if isVerbose {
 		logger.VerboseEnabled = true
@@ -60,9 +58,9 @@ func initConfig() {
 		viper.AddConfigPath(home)
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	// TODO: read in environment variables that match
+	// viper.AutomaticEnv()
 
-	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		logger.Verbose("Using config file", viper.ConfigFileUsed())
 	} else {
@@ -71,7 +69,6 @@ func initConfig() {
 		} else if pe, ok := err.(viper.ConfigParseError); ok {
 			logger.Error(pe)
 		} else {
-			logger.Warn("Config file was found but another error was produced")
 			logger.Error(err)
 		}
 	}
