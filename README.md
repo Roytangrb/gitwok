@@ -28,6 +28,7 @@
 <details>
 <summary>Usage</summary>
 
+- [`add` command](#add-command)
 - [`commit` command](#commit-command)
 
 </details>
@@ -56,6 +57,8 @@ $ go get -u github.com/Roytangrb/gitwok
 > coming soon
 
 ## Usage
+
+### `add` command
 
 ### `commit` command
 The `gitwok commit` command is used for building the commit message following <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" /></a> specification, and execute `git commit -m <msg>`.

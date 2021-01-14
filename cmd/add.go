@@ -11,6 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// git status --short (more detail)
+// In the short-format, the status of each path is shown as one of these forms
+//    XY PATH
+//    XY ORIG_PATH -> PATH
+// X shows the status of the index, and Y shows the status of the work tree.
+
+// TODO: handle merge conflict cases for index status
+
 const (
 	// CodeAddedNotStaged added not staged
 	CodeAddedNotStaged = " A"
@@ -18,12 +26,14 @@ const (
 	CodeModifiedNotStaged = " M"
 	// CodeDeletedNotStaged deleted not staged
 	CodeDeletedNotStaged = " D"
+	// CodeRenamedNotStaged renamed in work tree not staged
+	CodeRenamedNotStaged = " R"
+	// CodeCopiedNotStaged copied in work tree not staged
+	CodeCopiedNotStaged = " C"
 	// CodeUntracked untracked
 	CodeUntracked = "??"
-	// CodeRenamedNotStaged renamed in work tree not staged
-	CodeRenamedNotStaged = " R" // TODO: verify meaning
-	// CodeCopiedNotStaged copied in work tree not staged
-	CodeCopiedNotStaged = " C" // TODO: verify meaning
+	// PathSepArrow path seperator if file is moved or copied
+	PathSepArrow = "->"
 )
 
 func translateShortCode(code string) string {
@@ -34,22 +44,24 @@ func translateShortCode(code string) string {
 		return "modified"
 	case CodeDeletedNotStaged:
 		return "deleted"
-	case CodeUntracked:
-		return "untracked"
 	case CodeRenamedNotStaged:
 		return "renamed"
 	case CodeCopiedNotStaged:
 		return "copied"
+	case CodeUntracked:
+		return "untracked"
 	default:
 		return "unknown"
 	}
 }
 
-// UnstagedShortCode git status --short output XY code of not staged files
-var UnstagedShortCode = []string{
+// UnstagedShortCodes git status --short output XY code of not staged files
+var UnstagedShortCodes = []string{
 	CodeAddedNotStaged,
 	CodeModifiedNotStaged,
 	CodeDeletedNotStaged,
+	CodeRenamedNotStaged,
+	CodeCopiedNotStaged,
 	CodeUntracked,
 }
 
@@ -66,25 +78,24 @@ func findUnstaged() ([]string, []string) {
 	lines := []string{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		for _, code := range UnstagedShortCode {
+		for _, code := range UnstagedShortCodes {
 			if strings.HasPrefix(line, code) {
 				lines = append(lines, line)
 			}
 		}
 	}
 
-	// TODO: handle XY ORIG_PATH -> PATH
 	codes := []string{}
 	filepaths := []string{}
 	for _, line := range lines {
 		code := line[:2]
 		rest := strings.TrimSpace(line[2:])
-		if !ContainsWhiteSpace(rest) {
-			codes = append(codes, code)
-			filepaths = append(filepaths, rest)
+		if strings.Contains(rest, PathSepArrow) {
+			// TODO: handle file renamed or copied ORIG_PATH -> PATH
 		} else {
-			// TODO: handle filepath with whitespace
-
+			codes = append(codes, code)
+			// filepath whitespace no encoded, should be handled in later steps
+			filepaths = append(filepaths, rest)
 		}
 	}
 
