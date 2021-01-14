@@ -49,9 +49,9 @@ func InitLogger(
 	errorHandle io.Writer) *Logger {
 
 	return &Logger{
-		verboseLogger: log.New(verboseHandle, "[Verbose]: ", log.Ldate|log.Ltime),
-		infoLogger:    log.New(infoHandle, "[Info]: ", log.Ldate|log.Ltime),
-		warnLogger:    log.New(warnHandle, "[Warn]: ", log.Ldate|log.Ltime),
-		errorLogger:   log.New(errorHandle, "[Error]: ", log.Ldate|log.Ltime),
+		verboseLogger: log.New(verboseHandle, "[Verbose]: ", 0),
+		infoLogger:    log.New(infoHandle, "[Info]: ", 0),
+		warnLogger:    log.New(warnHandle, "[Warn]: ", 0),
+		errorLogger:   log.New(errorHandle, "[Error]: ", 0),
 	}
 }

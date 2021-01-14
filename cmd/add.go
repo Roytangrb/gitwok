@@ -21,9 +21,9 @@ const (
 	// CodeUntracked untracked
 	CodeUntracked = "??"
 	// CodeRenamedNotStaged renamed in work tree not staged
-	CodeRenamedNotStaged = " R" // TOOD: verify meaning
+	CodeRenamedNotStaged = " R" // TODO: verify meaning
 	// CodeCopiedNotStaged copied in work tree not staged
-	CodeCopiedNotStaged = " C" // TOOD: verify meaning
+	CodeCopiedNotStaged = " C" // TODO: verify meaning
 )
 
 func translateShortCode(code string) string {
