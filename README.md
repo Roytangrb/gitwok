@@ -14,9 +14,6 @@
   <a href="https://goreportcard.com/report/github.com/Roytangrb/gitwok">
     <img alt="goreport" src="https://goreportcard.com/badge/github.com/Roytangrb/gitwok" />
   </a>
-  <a href="https://conventionalcommits.org">
-    <img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" />
-  </a>
 </p>
 
 ## Table of Contents
@@ -61,7 +58,7 @@ $ go get -u github.com/Roytangrb/gitwok
 ## Usage
 
 ### `commit` command
-The `gitwok commit` command is used for building the commit message following [conventional commit v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification, followed by executing `git commit -m <msg>`.
+The `gitwok commit` command is used for building the commit message following <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" /></a> specification, and execute `git commit -m <msg>`.
 
 #### `flags` mode
 You can build the commit message using flags for subcommand `commit`, example: 
@@ -75,7 +72,7 @@ $ docs(readme.md): commit command usage
 You can check all flags by `gitwok commit --help`
 
 #### `interactive` mode
-You may also build the commit message using interactively by running 
+You may also build the commit message interactively by running 
 ```
 $ gitwok commit
 ````

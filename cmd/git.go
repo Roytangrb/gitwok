@@ -9,6 +9,12 @@ import (
 // GitExec git executable name
 const GitExec = "git"
 
+// GitAddAll exec `git add .`
+func GitAddAll() {
+	cmd := exec.Command(GitExec, "add", ".")
+	must(cmd.Run())
+}
+
 // GitCommit exec `git commit -m`
 func GitCommit(msg string) {
 	cmd := exec.Command(GitExec, "commit", "-m", msg)
