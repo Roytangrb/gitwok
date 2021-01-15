@@ -27,8 +27,10 @@ const (
 	// CodeDeletedNotStaged deleted not staged
 	CodeDeletedNotStaged = " D"
 	// CodeRenamedNotStaged renamed in work tree not staged
+	// not common, `git rename` will automatically stage the changes
 	CodeRenamedNotStaged = " R"
 	// CodeCopiedNotStaged copied in work tree not staged
+	// not common, TODO: verify usage
 	CodeCopiedNotStaged = " C"
 	// CodeUntracked untracked
 	CodeUntracked = "??"
@@ -114,12 +116,15 @@ var addCmd = &cobra.Command{
 
 		codes, filepaths := findUnstaged()
 		if len(filepaths) > 0 {
+			codeDict := make(map[string]string)
 			fpDict := make(map[string]string)
+
 			labels := []string{}
 			for i, fp := range filepaths {
 				code := codes[i]
 				label := translateShortCode(code) + ": " + fp
 				labels = append(labels, label)
+				codeDict[label] = code
 				fpDict[label] = fp
 			}
 
@@ -132,12 +137,17 @@ var addCmd = &cobra.Command{
 			must(survey.AskOne(prompt, &selectedLabels))
 
 			for _, label := range selectedLabels {
+				code := codeDict[label]
 				fp := fpDict[label]
-				// verify filepath
-				if _, err := os.Stat(fp); err == nil {
-					GitAdd(fp)
+
+				if code == CodeDeletedNotStaged {
+					GitRm(fp)
 				} else {
-					logger.Warn(err)
+					if _, err := os.Stat(fp); err == nil {
+						GitAdd(fp)
+					} else {
+						logger.Warn(err)
+					}
 				}
 			}
 		}

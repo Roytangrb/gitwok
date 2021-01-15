@@ -21,6 +21,12 @@ func GitAddAll() {
 	must(cmd.Run())
 }
 
+// GitRm exec `git rm` to stage changes of a deleted file
+func GitRm(fp string) {
+	cmd := exec.Command(GitExec, "rm", fp)
+	must(cmd.Run())
+}
+
 // GitCommit exec `git commit -m`
 func GitCommit(msg string) {
 	cmd := exec.Command(GitExec, "commit", "-m", msg)
