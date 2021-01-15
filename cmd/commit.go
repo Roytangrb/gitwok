@@ -7,6 +7,7 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -43,12 +44,62 @@ const (
 
 // CommitMsg properties
 type CommitMsg struct {
-	Type         string   // required, preset or config values only
-	Scope        string   // optional
-	HasBrkChange bool     // optional, default false
-	Description  string   // required, no line break
-	Body         string   // optional, allow line breaks
-	Footers      []string // optional, allow multiple lines
+	Type         string   `survey:"type"`        // required, preset or config values only
+	Scope        string   `survey:"scope"`       // optional
+	HasBrkChange bool     `survey:"breaking"`    // optional, default false
+	Description  string   `survey:"description"` // required, no line break
+	Body         string   `survey:"body"`        // optional, allow line breaks
+	Footers      []string `survey:"footers"`     // optional, allow multiple lines
+}
+
+// PresetCommitTypes conventional commits suggested types
+var PresetCommitTypes = []string{"fix", "feat", "build", "chore", "ci", "docs", "perf", "refactor", "style", "test"}
+
+// CommitMsgQuestions build CommitMsg struct for interactive commit mode
+var CommitMsgQuestions = []*survey.Question{
+	{
+		Name: "type",
+		Prompt: &survey.Select{
+			Message: "Choose commit type:",
+			Options: PresetCommitTypes,
+			Default: PresetCommitTypes[0],
+		},
+	},
+	{
+		Name: "scope", // TODO: use preset options from config
+		Prompt: &survey.Input{
+			Message: "Enter commit scope:",
+		},
+		Transform: survey.ComposeTransformers(
+			// TODO: fix bug, strings.ToLower cannot exec with interface{} nil
+			survey.TransformString(strings.ToLower), // TODO: config option
+			survey.TransformString(strings.TrimSpace),
+		),
+	},
+	{
+		Name: "breaking",
+		Prompt: &survey.Confirm{
+			Message: "Includes breaking changes?",
+			Default: false,
+		},
+	},
+	{
+		Name: "description",
+		Prompt: &survey.Input{
+			Message: fmt.Sprintln("Enter commit description:"),
+		},
+		Validate:  survey.Required,
+		Transform: survey.TransformString(strings.TrimSpace),
+	},
+	{
+		Name: "body",
+		Prompt: &survey.Multiline{
+			Message: fmt.Sprintln("Enter optional detail description:"),
+			// space is trim in survey multiline output answer
+			// TODO: feat(survey) Transform API is missing in type Multiline
+		},
+	},
+	// TODO: prompt footers and tranform to []string
 }
 
 func makeCommitMsg(
@@ -119,7 +170,7 @@ func ParseFooter(f string) (token, sep, val string) {
 // Validate commit msg elements
 // @return valid {bool}
 // @return msg {string} error msg
-func (cm CommitMsg) Validate() (bool, string) {
+func (cm *CommitMsg) Validate() (bool, string) {
 	if cm.Type == "" {
 		return false, RequiredType
 	} else if ContainsNewline(cm.Type) {
@@ -158,13 +209,27 @@ func (cm CommitMsg) Validate() (bool, string) {
 }
 
 // ToString format commit msg as conventional commits spec v1.0.0
-func (cm CommitMsg) ToString(fp string) string {
+func (cm *CommitMsg) ToString(fp string) string {
 	var tmplBytes bytes.Buffer
 
 	tmpl := mustTmpl(template.ParseFiles(fp)) // filepath relative to main.go
 	must(tmpl.Execute(&tmplBytes, cm))
 
 	return tmplBytes.String()
+}
+
+// Commit validate and git commit the CommitMsg
+func (cm *CommitMsg) Commit() {
+	if ok, msg := cm.Validate(); ok {
+		cmtMsgStr := cm.ToString("templates/commitmsg.tmpl")
+		if isVerbose {
+			logger.Verbose("Executing git commit -m with msg: ")
+			fmt.Print(cmtMsgStr)
+		}
+		GitCommit(cmtMsgStr)
+	} else {
+		logger.Fatal(msg)
+	}
 }
 
 // commitCmd represents the commit command
@@ -194,20 +259,11 @@ var commitCmd = &cobra.Command{
 
 			// try construct commit msg from flags
 			cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
-
-			if ok, msg := cmtMsg.Validate(); ok {
-				cmtMsgStr := cmtMsg.ToString("templates/commitmsg.tmpl")
-				if isVerbose {
-					logger.Verbose("Executing git commit -m with msg: ")
-					fmt.Print(cmtMsgStr)
-				}
-				GitCommit(cmtMsgStr)
-			} else {
-				logger.Fatal(msg)
-			}
+			cmtMsg.Commit()
 		} else {
-			// interactive mode
-			fmt.Println("Using interactive mode")
+			var cmtMsg CommitMsg
+			must(survey.Ask(CommitMsgQuestions, &cmtMsg))
+			cmtMsg.Commit()
 		}
 	},
 }
