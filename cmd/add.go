@@ -32,7 +32,7 @@ const (
 	CodeCopiedNotStaged = " C"
 	// CodeUntracked untracked
 	CodeUntracked = "??"
-	// PathSepArrow path seperator if file is moved or copied
+	// PathSepArrow path separator if file is moved or copied
 	PathSepArrow = "->"
 )
 

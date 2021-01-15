@@ -8,8 +8,8 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print GitWok version",
-	Long:  "Print GitWok and its dependencies' versions",
+	Short: "print version",
+	Long:  "print and its dependencies' versions",
 	Run: func(cmd *cobra.Command, args []string) {
 		printlnVer(rootCmd.Name(), rootCmd.Version)
 		fmt.Println()
