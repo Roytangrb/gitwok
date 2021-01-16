@@ -22,5 +22,5 @@ func init() {
 }
 
 func printlnVer(name string, semver string) {
-	fmt.Printf("%s %s\n", name, semver)
+	fmt.Print(fmt.Sprintln(name, semver))
 }

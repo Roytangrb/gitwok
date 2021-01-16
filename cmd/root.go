@@ -10,6 +10,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+// VersionTmpl version template for --version output
+const VersionTmpl = `
+{{- .Name}} {{.Version}}
+`
+
 var (
 	cfgFile   string
 	isVerbose bool
@@ -20,7 +25,7 @@ var logger *util.Logger = util.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.St
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gitwok",
-	Version: "v0.1.0",
+	Version: "v0.1.2",
 	Short:   "Configurable CLI with conventional commits, changelog, git hooks all in one",
 	Run:     func(cmd *cobra.Command, args []string) {},
 }
@@ -34,7 +39,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.SetVersionTemplate("{{.Name}} {{.Version}}\n")
+	rootCmd.SetVersionTemplate(VersionTmpl)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./gitwok.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&isVerbose, "verbose", "v", false, "verbose output")
@@ -65,11 +70,11 @@ func initConfig() {
 		logger.Verbose("Using config file", viper.ConfigFileUsed())
 	} else {
 		if fnfe, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logger.Error(fnfe)
+			logger.Warn(fnfe)
 		} else if pe, ok := err.(viper.ConfigParseError); ok {
-			logger.Error(pe)
+			logger.Warn(pe)
 		} else {
-			logger.Error(err)
+			logger.Warn(err)
 		}
 	}
 }

@@ -104,3 +104,6 @@ You will be prompted for selecting/entering each commit message component.
 
 ## Reference
 * [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+* [Cobra](https://github.com/spf13/cobra)
+* [Survey](https://github.com/AlecAivazis/survey)
+* [Carbon](https://carbon.now.sh/)
