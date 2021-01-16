@@ -70,20 +70,20 @@ func TestCommitMsgHeader(t *testing.T) {
 	msg3 := makeCommitMsg("docs", "", true, "fix typo", "", []string{})
 	msg4 := makeCommitMsg("fix", "lib", true, "fix bug", "", []string{})
 
-	if s := msg1.ToString(); s != fmt.Sprintf("docs: fix typo%s", NL) {
-		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n`, s)
+	if got, expected := msg1.ToString(), fmt.Sprintln("docs: fix typo"); got != expected {
+		t.Errorf(`expected: %s, got: %s`, expected, got)
 	}
 
-	if s := msg2.ToString(); s != fmt.Sprintf("docs(READ ME.md): fix typo%s", NL) {
-		t.Errorf(`expected: %s, got: %s`, `docs(READ ME.md): fix typo\n`, s)
+	if got, expected := msg2.ToString(), fmt.Sprintln("docs(READ ME.md): fix typo"); got != expected {
+		t.Errorf(`expected: %s, got: %s`, expected, got)
 	}
 
-	if s := msg3.ToString(); s != fmt.Sprintf("docs!: fix typo%s", NL) {
-		t.Errorf(`expected: %s, got: %s`, `docs!: fix typo\n`, s)
+	if got, expected := msg3.ToString(), fmt.Sprintln("docs!: fix typo"); got != expected {
+		t.Errorf(`expected: %s, got: %s`, expected, got)
 	}
 
-	if s := msg4.ToString(); s != fmt.Sprintf("fix(lib)!: fix bug%s", NL) {
-		t.Errorf(`expected: %s, got: %s`, `fix(lib)!: fix bug\n`, s)
+	if got, expected := msg4.ToString(), fmt.Sprintln("fix(lib)!: fix bug"); got != expected {
+		t.Errorf(`expected: %s, got: %s`, expected, got)
 	}
 }
 
