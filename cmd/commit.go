@@ -52,6 +52,16 @@ type CommitMsg struct {
 	Footers      []string `survey:"footers"`     // optional, allow multiple lines
 }
 
+// CommitMsgTmpl template for building commit message
+const CommitMsgTmpl = `{{.Type}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChange}}!{{end}}: {{.Description}}
+{{if .Body}}
+{{.Body}}
+{{end}}{{if .Footers}}
+{{- range .Footers}}
+{{. -}}
+{{end}}
+{{end}}`
+
 // PresetCommitTypes conventional commits suggested types
 var PresetCommitTypes = []string{"fix", "feat", "build", "chore", "ci", "docs", "perf", "refactor", "style", "test"}
 
@@ -71,7 +81,7 @@ var CommitMsgQuestions = []*survey.Question{
 			Message: "Enter commit scope:",
 		},
 		Transform: survey.ComposeTransformers(
-			// TODO: fix bug, strings.ToLower cannot exec with interface{} nil
+			// [Bug](https://github.com/AlecAivazis/survey/issues/329)
 			survey.TransformString(strings.ToLower), // TODO: config option
 			survey.TransformString(strings.TrimSpace),
 		),
@@ -209,10 +219,10 @@ func (cm *CommitMsg) Validate() (bool, string) {
 }
 
 // ToString format commit msg as conventional commits spec v1.0.0
-func (cm *CommitMsg) ToString(fp string) string {
+func (cm *CommitMsg) ToString() string {
 	var tmplBytes bytes.Buffer
 
-	tmpl := mustTmpl(template.ParseFiles(fp)) // filepath relative to main.go
+	tmpl := mustTmpl(template.New("commitmsg").Parse(CommitMsgTmpl))
 	must(tmpl.Execute(&tmplBytes, cm))
 
 	return tmplBytes.String()
@@ -221,7 +231,7 @@ func (cm *CommitMsg) ToString(fp string) string {
 // Commit validate and git commit the CommitMsg
 func (cm *CommitMsg) Commit() {
 	if ok, msg := cm.Validate(); ok {
-		cmtMsgStr := cm.ToString("templates/commitmsg.tmpl")
+		cmtMsgStr := cm.ToString()
 		if isVerbose {
 			logger.Verbose("Executing git commit -m with msg: ")
 			fmt.Print(cmtMsgStr)

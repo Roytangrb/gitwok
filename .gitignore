@@ -12,5 +12,5 @@
 *.out
 coverage.*
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Dependency directories (go mod vendor to debug dependency modules)
+vendor/
