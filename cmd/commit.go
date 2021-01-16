@@ -142,7 +142,7 @@ func makeCommitMsg(
 
 // ContainsNewline check if string contains newline chars
 func ContainsNewline(s string) bool {
-	return strings.Contains(s, "\n") || strings.Contains(s, "\r\n")
+	return strings.Contains(s, fmt.Sprintln())
 }
 
 // ContainsWhiteSpace check if string contains whitesapces

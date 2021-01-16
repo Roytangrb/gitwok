@@ -2,23 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"runtime"
 	"strings"
 	"testing"
 )
 
-// NL is newline represented in os file
-var NL string = DefineNewline()
-
-func DefineNewline() string {
-	if runtime.GOOS == "windows" {
-		return "\r\n"
-	}
-	return "\n"
-}
+var NL = fmt.Sprintln()
 
 func TestContainsNewline(t *testing.T) {
-	if !ContainsNewline(NL) {
+	if !ContainsNewline(fmt.Sprintln()) {
 		t.Error("ContainsNewline check failed")
 	}
 }
@@ -53,15 +44,15 @@ func TestCommitMsgHeader(t *testing.T) {
 	noDescMsg := makeCommitMsg("fix", "", false, "", "", []string{})
 
 	if ok, msg := emptyMsg.Validate(); ok || msg != RequiredType {
-		t.Errorf(`Required commit type check failed, expected: %s, got: %s`, RequiredType, msg)
+		t.Errorf("Required commit type check failed, expected: %s, got: %s", RequiredType, msg)
 	}
 
 	if ok, msg := invalidScopeMsg.Validate(); ok || msg != InvalidScope {
-		t.Errorf(`No linebreak in scope check failed, expected: %s, got: %s`, InvalidScope, msg)
+		t.Errorf("No linebreak in scope check failed, expected: %s, got: %s", InvalidScope, msg)
 	}
 
 	if ok, msg := noDescMsg.Validate(); ok || msg != RequiredDesc {
-		t.Errorf(`Required commit description check failed, expected: %s, got: %s`, RequiredDesc, msg)
+		t.Errorf("Required commit description check failed, expected: %s, got: %s", RequiredDesc, msg)
 	}
 
 	// test toString format
@@ -71,19 +62,19 @@ func TestCommitMsgHeader(t *testing.T) {
 	msg4 := makeCommitMsg("fix", "lib", true, "fix bug", "", []string{})
 
 	if got, expected := msg1.ToString(), fmt.Sprintln("docs: fix typo"); got != expected {
-		t.Errorf(`expected: %s, got: %s`, expected, got)
+		t.Errorf("expected: %s, got: %s", expected, got)
 	}
 
 	if got, expected := msg2.ToString(), fmt.Sprintln("docs(READ ME.md): fix typo"); got != expected {
-		t.Errorf(`expected: %s, got: %s`, expected, got)
+		t.Errorf("expected: %s, got: %s", expected, got)
 	}
 
 	if got, expected := msg3.ToString(), fmt.Sprintln("docs!: fix typo"); got != expected {
-		t.Errorf(`expected: %s, got: %s`, expected, got)
+		t.Errorf("expected: %s, got: %s", expected, got)
 	}
 
 	if got, expected := msg4.ToString(), fmt.Sprintln("fix(lib)!: fix bug"); got != expected {
-		t.Errorf(`expected: %s, got: %s`, expected, got)
+		t.Errorf("expected: %s, got: %s", expected, got)
 	}
 }
 
@@ -91,10 +82,11 @@ func TestCommitMsgHeader(t *testing.T) {
 // @spec conventional commits v1.0.0
 // 6. body MUST begin one blank line after the description
 func TestCommitMsgBody(t *testing.T) {
-	msg1 := makeCommitMsg("docs", "", false, "fix typo", "msg body\nbody line2", []string{})
+	body := fmt.Sprintln("msg body") + NL + "body line2"
+	msg1 := makeCommitMsg("docs", "", false, "fix typo", body, []string{})
 
-	if s := msg1.ToString(); s != fmt.Sprintf("docs: fix typo%s%smsg body\nbody line2%s", NL, NL, NL) {
-		t.Errorf(`expected: %s, got: %s`, `docs: fix typo\n\nmsg body\nbody line2\n`, s)
+	if got, expected := msg1.ToString(), fmt.Sprintln("docs: fix typo")+NL+fmt.Sprintln(body); got != expected {
+		t.Errorf("expected: %s%%, got: %s%%", expected, got)
 	}
 }
 
@@ -104,7 +96,7 @@ func TestParseFooter(t *testing.T) {
 	}
 
 	// footer's value can have newlines
-	if token, sep, val := ParseFooter("token: value1\nvalue2"); token != "token" || sep != FSepColonSpace || val != "value1\nvalue2" {
+	if token, sep, val := ParseFooter(fmt.Sprintf("token: value1%svalue2", NL)); token != "token" || sep != FSepColonSpace || val != fmt.Sprintf("value1%svalue2", NL) {
 		t.Error("ParseFooter check failed")
 	}
 
@@ -129,8 +121,8 @@ func TestParseFooter(t *testing.T) {
 func TestCommitMsgFooter(t *testing.T) {
 	// test validation
 	validFts := []string{
-		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChange),
-		fmt.Sprintf("%s: some\nchange\nof lines", FTokenBrkChangeAlias),
+		fmt.Sprintf("%s: some%schange%sof lines", FTokenBrkChange, NL, NL),
+		fmt.Sprintf("%s: some%schange%sof lines", FTokenBrkChangeAlias, NL, NL),
 		"Acked-by: RT",
 		"Reviewed: ", // separator space should not be trimed if no footer value
 		"fix #1",
@@ -164,13 +156,13 @@ func TestCommitMsgFooter(t *testing.T) {
 	}
 
 	footerAfterBodyMsg := makeCommitMsg("test", "spec 8a", false, "check newline after body", "body", []string{"Acked-by: RT"})
-	if s := footerAfterBodyMsg.ToString(); s != strings.ReplaceAll("test(spec 8a): check newline after body%s%sbody%s%sAcked-by: RT%s", "%s", NL) {
-		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after body\n\nbody\n\nAcked-by: RT\n`, s)
+	if got, expected := footerAfterBodyMsg.ToString(), strings.ReplaceAll("test(spec 8a): check newline after body%s%sbody%s%sAcked-by: RT%s", "%s", NL); got != expected {
+		t.Errorf(`Spec rule 8a check failed, expected: %s%%, got: %s%%`, expected, got)
 	}
 
 	footerAfterHeaderMsg := makeCommitMsg("test", "spec 8a", false, "check newline after header", "", []string{"Acked-by: RT"})
-	if s := footerAfterHeaderMsg.ToString(); s != strings.ReplaceAll("test(spec 8a): check newline after header%s%sAcked-by: RT%s", "%s", NL) {
-		t.Errorf(`Spec rule 8a check failed, expected: %s, got: %s`, `test(spec 8a): check newline after header\n\nAcked-by: RT\n`, s)
+	if got, expected := footerAfterHeaderMsg.ToString(), strings.ReplaceAll("test(spec 8a): check newline after header%s%sAcked-by: RT%s", "%s", NL); got != expected {
+		t.Errorf(`Spec rule 8a check failed, expected: %s%%, got: %s%%`, expected, got)
 	}
 }
 
