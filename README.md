@@ -60,10 +60,18 @@ $ go get -u github.com/Roytangrb/gitwok
 
 ### `add` command
 
+The add subcommand prompts for selecting unstaged changes of the current directory to be added for commiting.
+```
+$ gitwok add
+```
+![add command capture](docs/images/add.png)
+
 ### `commit` command
-The `gitwok commit` command is used for building the commit message following <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" /></a> specification, and execute `git commit -m <msg>`.
+
+The `commit` subcommand is used for building the commit message following <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank"><img alt="Conventional Commits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" /></a> specification, and execute `git commit -m <msg>`.
 
 #### `flags` mode
+
 You can build the commit message using flags for subcommand `commit`, example: 
 ```
 $ gitwok commit -t docs -s readme.md -d "commit command usage"
@@ -75,13 +83,14 @@ $ docs(readme.md): commit command usage
 You can check all flags by `gitwok commit --help`
 
 #### `interactive` mode
-You may also build the commit message interactively by running 
+
+You may also build the commit message interactively by running :
 ```
 $ gitwok commit
 ````
-with no flag or argument. You will be prompted for selecting/entering each conventional commit message component.
+You will be prompted for selecting/entering each commit message component.
 
-> coming soon
+![commit command capture](docs/images/commit.png)
 
 ## Configuration
 
