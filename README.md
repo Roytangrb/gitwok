@@ -46,6 +46,7 @@
 ## Install
 
 ### Go get
+
 If you have `Go` setup on your machine, get and install by:
 ```
 $ go get -u github.com/Roytangrb/gitwok
@@ -54,7 +55,11 @@ $ go get -u github.com/Roytangrb/gitwok
 
 ### Homebrew
 
-> coming soon
+To install on a Mac with [homebrew](https://brew.sh/) installed, run:
+```
+$ brew tap roytangrb/gitwok
+$ brew install gitwok
+```
 
 ## Usage
 

@@ -109,7 +109,7 @@ var CommitMsgQuestions = []*survey.Question{
 			// TODO: feat(survey) Transform API is missing in type Multiline
 		},
 	},
-	// TODO: prompt footers and tranform to []string
+	// TODO: prompt footers and transform to []string
 }
 
 func makeCommitMsg(
