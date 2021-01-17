@@ -1,0 +1,56 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+name: CD
+
+jobs:
+  build:
+    name: Create & Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.15'
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
+
+      - name: Build
+        run: go build -v -o gitwok .
+
+      - name: Archive tar.gz
+        run: tar -czf gitwok-mac.tar.gz gitwok
+      
+      - name: Gen Sha 256
+        id: gen_sha_256
+        run: echo "::set-output name=TARGZSHA256::$(shasum -a 256 gitwok-mac.tar.gz)"
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: |
+            - Sha 256: ${{ steps.gen_sha_256.outputs.TARGZSHA256 }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./gitwok-mac.tar.gz
+          asset_name: gitwok-mac.tar.gz
+          asset_content_type: application/x-gzip
