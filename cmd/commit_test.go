@@ -90,6 +90,10 @@ func TestCommitMsgBody(t *testing.T) {
 	}
 }
 
+func TestMatchFooters(t *testing.T) {
+	// TODO:
+}
+
 func TestParseFooter(t *testing.T) {
 	if token, sep, val := ParseFooter("token: "); token != "token" || sep != FSepColonSpace || val != "" {
 		t.Error("ParseFooter check failed")
@@ -107,6 +111,10 @@ func TestParseFooter(t *testing.T) {
 	if token, sep, val := ParseFooter("fix sth"); token != "" || sep != "" || val != "" {
 		t.Error("ParseFooter check failed")
 	}
+}
+
+func TestTrimFooter(t *testing.T) {
+	// TODO:
 }
 
 // TestCommitMsgFooter

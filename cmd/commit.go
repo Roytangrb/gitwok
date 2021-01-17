@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"strings"
 	"text/template"
 	"unicode"
@@ -81,8 +82,8 @@ var CommitMsgQuestions = []*survey.Question{
 			Message: "Enter commit scope:",
 		},
 		Transform: survey.ComposeTransformers(
-			// [Bug](https://github.com/AlecAivazis/survey/issues/329)
-			survey.TransformString(strings.ToLower), // TODO: config option
+			// TODO: [Bug](https://github.com/AlecAivazis/survey/issues/329)
+			// survey.TransformString(strings.ToLower), // TODO: config option
 			survey.TransformString(strings.TrimSpace),
 		),
 	},
@@ -96,7 +97,7 @@ var CommitMsgQuestions = []*survey.Question{
 	{
 		Name: "description",
 		Prompt: &survey.Input{
-			Message: fmt.Sprintln("Enter commit description:"),
+			Message: "Enter commit description:",
 		},
 		Validate:  survey.Required,
 		Transform: survey.TransformString(strings.TrimSpace),
@@ -104,12 +105,44 @@ var CommitMsgQuestions = []*survey.Question{
 	{
 		Name: "body",
 		Prompt: &survey.Multiline{
-			Message: fmt.Sprintln("Enter optional detail description:"),
+			Message: "Enter optional commit body:",
 			// space is trim in survey multiline output answer
 			// TODO: feat(survey) Transform API is missing in type Multiline
 		},
 	},
-	// TODO: prompt footers and transform to []string
+}
+
+// FootersQuestions ask footers input separately to handle custom parse logic
+var FootersQuestions = []*survey.Question{
+	{
+		Name: "footers",
+		Prompt: &survey.Multiline{
+			Message: "Enter optional footers:",
+		},
+	},
+}
+
+// CommitFooters helper struct for separate survey with custom Setter
+type CommitFooters struct {
+	Footers []string `survey:"footers"`
+}
+
+// WriteAnswer implements Settable interface of CommitMsg for survey
+// assign string input to parsed footer slice
+func (ft *CommitFooters) WriteAnswer(name string, value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("Write %s error, got: %v", name, value)
+	}
+
+	if str == "" {
+		ft.Footers = []string{}
+		return nil
+	}
+
+	ft.Footers = MatchFooters(str)
+
+	return nil
 }
 
 func makeCommitMsg(
@@ -121,14 +154,7 @@ func makeCommitMsg(
 	footers []string,
 ) *CommitMsg {
 	for i, s := range footers {
-		// separator space should not be trimed if no footer value
-		if !strings.HasSuffix(s, FSepColonSpace) {
-			s = strings.TrimRightFunc(s, unicode.IsSpace)
-		}
-		if !strings.HasPrefix(s, FSepSpaceSharp) {
-			s = strings.TrimLeftFunc(s, unicode.IsSpace)
-		}
-		footers[i] = s
+		footers[i] = TrimFooter(s)
 	}
 	return &CommitMsg{
 		Type:         strings.TrimSpace(cmtType),
@@ -160,6 +186,39 @@ func IsBrkChnFooter(token string) bool {
 	return token == FTokenBrkChange || token == FTokenBrkChangeAlias
 }
 
+// MatchFooters takes raw footers input string and return
+// string slice of found footers.
+// Match <token + sep>, find indices and take values in between
+// Caveats: "BREAKING CHANGE #" is not matched, for " #" is not
+// valid separator for breaking change, instead, "CHANGE #" is matched
+func MatchFooters(str string) []string {
+	re := regexp.MustCompile(`([\w-]+(: | #))|(BREAKING CHANGE: )`)
+	indices := re.FindAllStringIndex(str, -1)
+
+	if indices == nil {
+		logger.Warn("No valid footer message found")
+		return []string{}
+	}
+
+	footers := []string{}
+	for i, idx := range indices {
+		start, end := idx[0], idx[1]
+		tokenSep := str[start:end]
+		var value string
+		if i != len(indices)-1 {
+			nextStart := indices[i+1][0]
+			value = str[end:nextStart]
+		} else {
+			value = str[end:]
+		}
+		footer := TrimFooter(tokenSep + value)
+		footers = append(footers, footer)
+	}
+	logger.Verbose(fmt.Sprintf("Parsed %d footers:", len(footers)), footers)
+
+	return footers
+}
+
 // ParseFooter return components of a commit msg footer if seperable by ": " or " #"
 // @param f footer without no newlines
 // @return token "" if separated wrongly
@@ -177,13 +236,26 @@ func ParseFooter(f string) (token, sep, val string) {
 	return "", "", ""
 }
 
+// TrimFooter separator space should not be trimed if no footer value
+func TrimFooter(s string) string {
+	// TODO: handle "[\s] #123", "Review: [\s]"
+	if !strings.HasSuffix(s, FSepColonSpace) {
+		s = strings.TrimRightFunc(s, unicode.IsSpace)
+	}
+	if !strings.HasPrefix(s, FSepSpaceSharp) {
+		s = strings.TrimLeftFunc(s, unicode.IsSpace)
+	}
+
+	return s
+}
+
 // Validate commit msg elements
 // @return valid {bool}
 // @return msg {string} error msg
 func (cm *CommitMsg) Validate() (bool, string) {
 	if cm.Type == "" {
 		return false, RequiredType
-	} else if ContainsNewline(cm.Type) {
+	} else if ContainsWhiteSpace(cm.Type) {
 		return false, InvalidType
 	}
 
@@ -273,6 +345,11 @@ var commitCmd = &cobra.Command{
 		} else {
 			var cmtMsg CommitMsg
 			must(survey.Ask(CommitMsgQuestions, &cmtMsg))
+
+			var ft CommitFooters
+			must(survey.Ask(FootersQuestions, &ft))
+
+			cmtMsg.Footers = ft.Footers
 			cmtMsg.Commit()
 		}
 	},
