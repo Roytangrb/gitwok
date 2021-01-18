@@ -45,7 +45,7 @@ jobs:
           prerelease: false
       
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload_release_asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,3 +54,15 @@ jobs:
           asset_path: ./gitwok-mac.tar.gz
           asset_name: gitwok-mac.tar.gz
           asset_content_type: application/x-gzip
+
+      - name: Bump Homebrew tap formula
+        uses: mislav/bump-homebrew-formula-action@v1
+        if: "!contains(github.ref, '-')" # skip prereleases
+        with:
+          formula-name: gitwok
+          homebrew-tap: Roytangrb/homebrew-gitwok
+          base-branch: main
+          download-url: ${{ steps.upload_release_asset.outputs.browser_download_url }}
+          commit-message: Release {{version}}
+        env:
+          COMMITTER_TOKEN: ${{ secrets.BREW_TAP_REPO_TOKEN }}
