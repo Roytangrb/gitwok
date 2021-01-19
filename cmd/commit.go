@@ -237,12 +237,22 @@ func ParseFooter(f string) (token, sep, val string) {
 }
 
 // TrimFooter separator space should not be trimed if no footer value
+// Whitespace trimmed value may contains leading "#" or trailing ":",
+// treat it as intention to mean a separator, add the space back
 func TrimFooter(s string) string {
 	if !strings.HasSuffix(s, FSepColonSpace) {
 		s = strings.TrimRightFunc(s, unicode.IsSpace)
 	}
 	if !strings.HasPrefix(s, FSepSpaceSharp) {
 		s = strings.TrimLeftFunc(s, unicode.IsSpace)
+	}
+
+	if strings.HasPrefix(s, "#") {
+		s = " " + s
+	}
+
+	if strings.HasSuffix(s, ":") {
+		s = s + " "
 	}
 
 	return s

@@ -129,8 +129,8 @@ func TestTrimFooter(t *testing.T) {
 		{"Acked-by: ", "Acked-by: "},
 		{"BREAKING CHANGE: ", "BREAKING CHANGE: "},
 		// preserver separators
-		{"  #1", " #1"},
-		{"Reviewed-by:   ", "Reviewed-by: "},
+		{"  #1 ", " #1"},
+		{" Reviewed-by:   ", "Reviewed-by: "},
 	}
 
 	for _, test := range tests {
