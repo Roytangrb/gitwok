@@ -38,7 +38,7 @@ const (
 	PathSepArrow = "->"
 )
 
-func translateShortCode(code string) string {
+func translateNotStaged(code string) string {
 	switch code {
 	case CodeAddedNotStaged:
 		return "added"
@@ -122,7 +122,7 @@ var addCmd = &cobra.Command{
 			labels := []string{}
 			for i, fp := range filepaths {
 				code := codes[i]
-				label := translateShortCode(code) + ": " + fp
+				label := translateNotStaged(code) + ": " + fp
 				labels = append(labels, label)
 				codeDict[label] = code
 				fpDict[label] = fp

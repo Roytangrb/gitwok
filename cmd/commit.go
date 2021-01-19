@@ -238,7 +238,6 @@ func ParseFooter(f string) (token, sep, val string) {
 
 // TrimFooter separator space should not be trimed if no footer value
 func TrimFooter(s string) string {
-	// TODO: handle "[\s] #123", "Review: [\s]"
 	if !strings.HasSuffix(s, FSepColonSpace) {
 		s = strings.TrimRightFunc(s, unicode.IsSpace)
 	}
