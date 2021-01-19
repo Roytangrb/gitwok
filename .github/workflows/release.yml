@@ -29,7 +29,7 @@ jobs:
           formula-name: gitwok
           homebrew-tap: Roytangrb/homebrew-gitwok
           base-branch: main
-          download-url: https://github.com/Roytangrb/gitwok/archive/${{ github.ref }}.tar.gz
+          download-url: https://github.com/Roytangrb/gitwok/archive/${{ github.event.release.tag_name }}.tar.gz
           commit-message: Release {{version}}
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TAP_REPO_TOKEN }}
