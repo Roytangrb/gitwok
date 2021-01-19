@@ -99,8 +99,52 @@ func TestCommitMsgBody(t *testing.T) {
 	}
 }
 
+func TestFootersWriteAnswer(t *testing.T) {
+	var cmtFooters CommitFooters
+	if err := cmtFooters.WriteAnswer("footers", 1); err == nil {
+		t.Errorf("Write answer to custom footers struct failed, reason: asserting string input should return error")
+	}
+
+	if err := cmtFooters.WriteAnswer("footers", ""); err != nil || len(cmtFooters.Footers) != 0 {
+		t.Errorf("Write answer to custom footers struct failed, reason: empty input should return []string")
+	}
+
+	if err := cmtFooters.WriteAnswer("footers", "Acked-By: RT"); err != nil {
+		t.Error("Write answer to custom footers struct failed, got error", err)
+	}
+}
+
 func TestMatchFooters(t *testing.T) {
-	// TODO:
+	if footers := MatchFooters(""); len(footers) != 0 {
+		t.Errorf("MatchFooters failed, empty input expected matched %d, matched %d, %v", 0, len(footers), footers)
+	}
+
+	var testStr = `
+Acked-By: RT fix readme
+with second line
+
+Reviewed-By: RT
+fix #1
+		
+  BREAKING CHANGE: asdf`
+
+	footers := MatchFooters(testStr)
+	if len(footers) != 4 {
+		t.Errorf("MatchFooters failed, empty input expected matched %d, matched %d, %v", 4, len(footers), footers)
+	}
+
+	var tests = []TestStrInOut{
+		{footers[0], "Acked-By: RT fix readme" + NL + "with second line"},
+		{footers[1], "Reviewed-By: RT"},
+		{footers[2], "fix #1"},
+		{footers[3], "BREAKING CHANGE: asdf"},
+	}
+
+	for _, test := range tests {
+		if got, expected := test.in, test.out; got != expected {
+			t.Errorf("MatchFooters failed, expected: %q, got: %q", expected, got)
+		}
+	}
 }
 
 func TestParseFooter(t *testing.T) {
