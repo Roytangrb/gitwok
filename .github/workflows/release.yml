@@ -10,6 +10,10 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
+      - name: Get the version tag
+        id: get_version_tag
+        run: echo ::set-output name=VERSION_TAG::${GITHUB_REF/refs\/tags\//}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -29,7 +33,7 @@ jobs:
           formula-name: gitwok
           homebrew-tap: Roytangrb/homebrew-gitwok
           base-branch: main
-          download-url: https://github.com/Roytangrb/gitwok/archive/${{ github.event.release.tag_name }}.tar.gz
+          download-url: https://github.com/Roytangrb/gitwok/archive/${{ steps.get_version_tag.outputs.VERSION_TAG }}.tar.gz
           commit-message: Release {{version}}
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TAP_REPO_TOKEN }}
