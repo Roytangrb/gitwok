@@ -7,30 +7,9 @@ name: CD
 
 jobs:
   build:
-    name: Create & Upload Release Asset
+    name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '^1.15'
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Get dependencies
-        run: go get -v -t -d ./...
-
-      - name: Build
-        run: go build -v -o gitwok .
-
-      - name: Archive tar.gz
-        run: tar -czf gitwok-mac.tar.gz gitwok
-      
-      - name: Gen Sha 256
-        id: gen_sha_256
-        run: echo "::set-output name=TARGZSHA256::$(shasum -a 256 gitwok-mac.tar.gz)"
-      
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -39,23 +18,10 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
-          body: |
-            - Sha 256: ${{ steps.gen_sha_256.outputs.TARGZSHA256 }}
+          # body_path: TODO: changelog
           draft: false
           prerelease: false
       
-      - name: Upload Release Asset
-        id: upload_release_asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # This pulls from the Create Release step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gitwok-mac.tar.gz
-          asset_name: gitwok-mac.tar.gz
-          asset_content_type: application/x-gzip
-
       - name: Bump Homebrew tap formula
         uses: mislav/bump-homebrew-formula-action@v1
         if: "!contains(github.ref, '-')" # skip prereleases
@@ -63,7 +29,7 @@ jobs:
           formula-name: gitwok
           homebrew-tap: Roytangrb/homebrew-gitwok
           base-branch: main
-          download-url: ${{ steps.upload_release_asset.outputs.browser_download_url }}
+          download-url: https://github.com/Roytangrb/gitwok/archive/${{ github.ref }}.tar.gz
           commit-message: Release {{version}}
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TAP_REPO_TOKEN }}

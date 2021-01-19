@@ -38,7 +38,7 @@ First, fork and clone this repo to your local `$GOPATH/src/gitwok`
 
 * `ci.yml`: this is the standard go CI workflow to run all tests, build and uploading test coverage report to `codecov.io`. The detailed report can be view [here](https://codecov.io/gh/Roytangrb/gitwok)
 
-* `release.yml`: the CD workflow is triggered whenever a tag starting with `v` is pushed. It builds the executable binary, tar zips and creates a release with the version tag. The zipped asset is uploaded as github release asset. And the corresponding Homebrew Fomula changes will be PR to another [Homebrew tap repo](https://github.com/Roytangrb/homebrew-gitwok).
+* `release.yml`: the CD workflow is triggered whenever a tag starting with `v` is pushed. It creates a release with the version tag. The default archived source code tar zip url is updated to [homebrew tap repo](https://github.com/Roytangrb/homebrew-gitwok). and version will be bumped. And the corresponding Homebrew Fomula changes will be committed.
 
 ## Testing
 

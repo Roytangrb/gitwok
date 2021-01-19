@@ -25,7 +25,7 @@ var logger *util.Logger = util.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.St
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gitwok",
-	Version: "v0.1.4",
+	Version: "v0.1.5",
 	Short:   "Configurable CLI with conventional commits, changelog, git hooks all in one",
 	Run:     func(cmd *cobra.Command, args []string) {},
 }
