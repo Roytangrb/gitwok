@@ -46,6 +46,8 @@ func init() {
 }
 
 func initConfig() {
+	viper.SetDefault("gitwok.commit.scope", []string{})
+
 	if isVerbose {
 		logger.VerboseEnabled = true
 	}

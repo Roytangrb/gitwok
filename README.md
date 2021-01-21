@@ -36,8 +36,8 @@
 <details>
 <summary>Configuration</summary>
 
-- [Conventional commits](#conventional-commits)
-- [Conventional changelog](#conventional-changelog)
+- [commit](#commit-config)
+- [changelog](#changelog-config)
 
 </details>
 
@@ -89,21 +89,56 @@ You can check all flags by `gitwok commit --help`
 
 #### `interactive` mode
 
-You may also build the commit message interactively by running :
+You may also build the commit message interactively by running:
 ```
 $ gitwok commit
-````
+```
 You will be prompted for selecting/entering each commit message component.
 
 ![commit command capture](docs/images/commit.png)
 
 ## Configuration
 
-### Conventional commits
+Configuration allows you to customize subcommands for more handy usage and avoid repeating dummy input.
 
-> coming soon
+For example, you could provide a preset of commit `scope` to choose from while commiting, or skip the `body` and `footers` prompts by default.
 
-### Conventional changelog
+Examples and full options could be found in [`docs/config`](https://github.com/Roytangrb/gitwok/tree/main/docs/config/).
+
+To apply a config file, you may specify a full path and name, i.e.:
+```
+$ gitwok commit --config "/path/to/your/config.yaml"
+```
+When no file path is set explictly by `--config` flag, it will look for a default `gitwok.yaml` file in the current working directory and then in your home directory.
+
+In the absence of a config file, default config will apply.
+
+### commit config
+
+* Toggle `prompt` of the optional fields in a commit msg, with boolean value
+* Set type options for selecting, default types are: `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `style`, `test`.
+* Set scope options for selecting. If no option is given, the prompt will become a single line input instead of a select.
+
+```yml
+# yaml
+gitwok:
+  commit:
+    prompt:
+      scope: true     # default true
+      breaking: true  # default true
+      body: true      # default true
+      footers: true   # default true
+    type:
+      - fix
+      - feat
+      # ...
+    scope:
+      - readme.md
+      - release
+      # ...
+```
+
+### changelog config
 
 > coming soon
 
