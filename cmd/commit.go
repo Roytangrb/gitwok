@@ -316,6 +316,67 @@ func (cm *CommitMsg) Commit() {
 	}
 }
 
+// Prompt use interactive prompts to build the commit message
+func (cm *CommitMsg) Prompt() {
+	var questions = []*survey.Question{}
+
+	// prompt type
+	var typeOptions []string
+	if options := viper.GetStringSlice("gitwok.commit.type"); len(options) != 0 {
+		typeOptions = options
+	} else {
+		typeOptions = PresetCommitTypes
+	}
+
+	questions = append(questions, &survey.Question{
+		Name: "type",
+		Prompt: &survey.Select{
+			Message: "Choose commit type:",
+			Options: typeOptions,
+			Default: typeOptions[0],
+		},
+	})
+
+	// prompt scope
+	if prompt := viper.GetBool("gitwok.commit.prompt.scope"); prompt {
+		if options := viper.GetStringSlice("gitwok.commit.scope"); len(options) != 0 {
+			var cmtScopeSelect = &survey.Question{
+				Name: "scope",
+				Prompt: &survey.Select{
+					Message: "Choose commit scope:",
+					Options: options,
+					Default: options[0],
+				},
+			}
+			questions = append(questions, cmtScopeSelect)
+		} else {
+			questions = append(questions, cmtScopeInput)
+		}
+	}
+
+	// prompt breaking
+	if prompt := viper.GetBool("gitwok.commit.prompt.breaking"); prompt {
+		questions = append(questions, cmtBrkConfirm)
+	}
+
+	// prompt description
+	questions = append(questions, cmtDescInput)
+
+	// prompt body
+	if prompt := viper.GetBool("gitwok.commit.prompt.body"); prompt {
+		questions = append(questions, cmtBodyMulti)
+	}
+
+	must(survey.Ask(questions, cm))
+
+	// prompt footers
+	if prompt := viper.GetBool("gitwok.commit.prompt.footers"); prompt {
+		var ft CommitFooters
+		must(survey.Ask(FootersQuestions, &ft))
+		cm.Footers = ft.Footers
+	}
+}
+
 // commitCmd represents the commit command
 var commitCmd = &cobra.Command{
 	Use:   "commit",
@@ -346,64 +407,7 @@ var commitCmd = &cobra.Command{
 			cmtMsg.Commit()
 		} else {
 			var cmtMsg CommitMsg
-			var questions = []*survey.Question{}
-
-			// prompt type
-			var typeOptions []string
-			if options := viper.GetStringSlice("gitwok.commit.type"); len(options) != 0 {
-				typeOptions = options
-			} else {
-				typeOptions = PresetCommitTypes
-			}
-
-			questions = append(questions, &survey.Question{
-				Name: "type",
-				Prompt: &survey.Select{
-					Message: "Choose commit type:",
-					Options: typeOptions,
-					Default: typeOptions[0],
-				},
-			})
-
-			// prompt scope
-			if prompt := viper.GetBool("gitwok.commit.prompt.scope"); prompt {
-				if options := viper.GetStringSlice("gitwok.commit.scope"); len(options) != 0 {
-					var cmtScopeSelect = &survey.Question{
-						Name: "scope",
-						Prompt: &survey.Select{
-							Message: "Choose commit scope:",
-							Options: options,
-							Default: options[0],
-						},
-					}
-					questions = append(questions, cmtScopeSelect)
-				} else {
-					questions = append(questions, cmtScopeInput)
-				}
-			}
-
-			// prompt breaking
-			if prompt := viper.GetBool("gitwok.commit.prompt.breaking"); prompt {
-				questions = append(questions, cmtBrkConfirm)
-			}
-
-			// prompt description
-			questions = append(questions, cmtDescInput)
-
-			// prompt body
-			if prompt := viper.GetBool("gitwok.commit.prompt.body"); prompt {
-				questions = append(questions, cmtBodyMulti)
-			}
-
-			must(survey.Ask(questions, &cmtMsg))
-
-			// prompt footers
-			if prompt := viper.GetBool("gitwok.commit.prompt.footers"); prompt {
-				var ft CommitFooters
-				must(survey.Ask(FootersQuestions, &ft))
-				cmtMsg.Footers = ft.Footers
-			}
-
+			cmtMsg.Prompt()
 			cmtMsg.Commit()
 		}
 	},
