@@ -1,0 +1,14 @@
+{
+  "gitwok": {
+    "commit": {
+      "prompt": {
+        "scope": true,
+        "breaking": false,
+        "body": false,
+        "footers": true
+      },
+      "type": ["fix", "feat", "build", "chore", "ci", "docs", "perf", "refactor", "style", "test"],
+      "scope": ["readme.md", "release"]
+    }
+  }
+}

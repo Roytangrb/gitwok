@@ -17,9 +17,5 @@ gitwok:
       - style
       - test
     scope:
-      - add
-      - commit
       - readme.md
       - release
-      - root
-      - version

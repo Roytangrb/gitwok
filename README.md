@@ -115,9 +115,9 @@ In the absence of a config file, default config will apply.
 
 ### commit config
 
-* Toggle `prompt` of the optional fields in a commit msg, with boolean value
-* Set type options for selecting, default types are: `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `style`, `test`.
-* Set scope options for selecting. If no option is given, the prompt will become a single line input instead of a select.
+* Toggle prompt of the optional fields in a commit msg, with boolean value
+* Set `type` options for selecting, default types are: `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `style`, `test`.
+* Set `scope` options for selecting. If no option is given, the prompt will become a single line input instead of a select.
 
 ```yml
 # yaml
@@ -145,5 +145,7 @@ gitwok:
 ## Reference
 * [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 * [Cobra](https://github.com/spf13/cobra)
+* [PFlag](https://github.com/spf13/pflag)
+* [Viper](https://github.com/spf13/viper)
 * [Survey](https://github.com/AlecAivazis/survey)
 * [Carbon](https://carbon.now.sh/)
