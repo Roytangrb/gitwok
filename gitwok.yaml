@@ -2,8 +2,8 @@ gitwok:
   commit:
     prompt:
       scope: true
-      breaking: true
-      body: true
+      breaking: false
+      body: false
       footers: true
     type:
       - fix

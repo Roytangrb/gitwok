@@ -11,6 +11,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -66,49 +67,59 @@ const CommitMsgTmpl = `{{.Type}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChan
 // PresetCommitTypes conventional commits suggested types
 var PresetCommitTypes = []string{"fix", "feat", "build", "chore", "ci", "docs", "perf", "refactor", "style", "test"}
 
-// CommitMsgQuestions build CommitMsg struct for interactive commit mode
-var CommitMsgQuestions = []*survey.Question{
-	{
-		Name: "type",
-		Prompt: &survey.Select{
-			Message: "Choose commit type:",
-			Options: PresetCommitTypes,
-			Default: PresetCommitTypes[0],
-		},
+var cmtTypeSelect = &survey.Question{
+	Name: "type",
+	Prompt: &survey.Select{
+		Message: "Choose commit type:",
+		Options: PresetCommitTypes,
+		Default: PresetCommitTypes[0],
 	},
-	{
-		Name: "scope", // TODO: use preset options from config
-		Prompt: &survey.Input{
-			Message: "Enter commit scope:",
-		},
-		Transform: survey.ComposeTransformers(
-			// TODO: [Bug](https://github.com/AlecAivazis/survey/issues/329)
-			// survey.TransformString(strings.ToLower), // TODO: config option
-			survey.TransformString(strings.TrimSpace),
-		),
+}
+
+var cmtScopeSelect = &survey.Question{
+	Name: "scope",
+	Prompt: &survey.Select{
+		Message: "Choose commit scope:",
+		Options: []string{}, // TODO: use preset options from config
+		// Default:
 	},
-	{
-		Name: "breaking",
-		Prompt: &survey.Confirm{
-			Message: "Includes breaking changes?",
-			Default: false,
-		},
+}
+
+var cmtScopeInput = &survey.Question{
+	Name: "scope",
+	Prompt: &survey.Input{
+		Message: "Enter commit scope:",
 	},
-	{
-		Name: "description",
-		Prompt: &survey.Input{
-			Message: "Enter commit description:",
-		},
-		Validate:  survey.Required,
-		Transform: survey.TransformString(strings.TrimSpace),
+	Transform: survey.ComposeTransformers(
+		// TODO: [Bug](https://github.com/AlecAivazis/survey/issues/329)
+		// survey.TransformString(strings.ToLower), // TODO: config option
+		survey.TransformString(strings.TrimSpace),
+	),
+}
+
+var cmtBrkConfirm = &survey.Question{
+	Name: "breaking",
+	Prompt: &survey.Confirm{
+		Message: "Includes breaking changes?",
+		Default: false,
 	},
-	{
-		Name: "body",
-		Prompt: &survey.Multiline{
-			Message: "Enter optional commit body:",
-			// space is trim in survey multiline output answer
-			// TODO: feat(survey) Transform API is missing in type Multiline
-		},
+}
+
+var cmtDescInput = &survey.Question{
+	Name: "description",
+	Prompt: &survey.Input{
+		Message: "Enter commit description:",
+	},
+	Validate:  survey.Required,
+	Transform: survey.TransformString(strings.TrimSpace),
+}
+
+var cmtBodyMulti = &survey.Question{
+	Name: "body",
+	Prompt: &survey.Multiline{
+		Message: "Enter optional commit body:",
+		// space is trim in survey multiline output answer
+		// TODO: feat(survey) Transform API is missing in type Multiline
 	},
 }
 
@@ -353,12 +364,31 @@ var commitCmd = &cobra.Command{
 			cmtMsg.Commit()
 		} else {
 			var cmtMsg CommitMsg
-			must(survey.Ask(CommitMsgQuestions, &cmtMsg))
+			var questions = []*survey.Question{}
 
-			var ft CommitFooters
-			must(survey.Ask(FootersQuestions, &ft))
+			questions = append(questions, cmtTypeSelect) // required
 
-			cmtMsg.Footers = ft.Footers
+			if prompt := viper.GetBool("gitwok.commit.prompt.scope"); prompt {
+				questions = append(questions, cmtScopeInput)
+			}
+			if prompt := viper.GetBool("gitwok.commit.prompt.breaking"); prompt {
+				questions = append(questions, cmtBrkConfirm)
+			}
+
+			questions = append(questions, cmtDescInput) // required
+
+			if prompt := viper.GetBool("gitwok.commit.prompt.body"); prompt {
+				questions = append(questions, cmtBodyMulti)
+			}
+
+			must(survey.Ask(questions, &cmtMsg))
+
+			if prompt := viper.GetBool("gitwok.commit.prompt.footers"); prompt {
+				var ft CommitFooters
+				must(survey.Ask(FootersQuestions, &ft))
+				cmtMsg.Footers = ft.Footers
+			}
+
 			cmtMsg.Commit()
 		}
 	},

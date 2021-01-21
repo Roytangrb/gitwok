@@ -46,6 +46,10 @@ func init() {
 }
 
 func initConfig() {
+	viper.SetDefault("gitwok.commit.prompt.scope", true)
+	viper.SetDefault("gitwok.commit.prompt.breaking", true)
+	viper.SetDefault("gitwok.commit.prompt.body", true)
+	viper.SetDefault("gitwok.commit.prompt.footers", true)
 	viper.SetDefault("gitwok.commit.scope", []string{})
 
 	if isVerbose {
