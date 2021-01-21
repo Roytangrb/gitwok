@@ -67,24 +67,6 @@ const CommitMsgTmpl = `{{.Type}}{{if .Scope}}({{.Scope}}){{end}}{{if .HasBrkChan
 // PresetCommitTypes conventional commits suggested types
 var PresetCommitTypes = []string{"fix", "feat", "build", "chore", "ci", "docs", "perf", "refactor", "style", "test"}
 
-var cmtTypeSelect = &survey.Question{
-	Name: "type",
-	Prompt: &survey.Select{
-		Message: "Choose commit type:",
-		Options: PresetCommitTypes,
-		Default: PresetCommitTypes[0],
-	},
-}
-
-var cmtScopeSelect = &survey.Question{
-	Name: "scope",
-	Prompt: &survey.Select{
-		Message: "Choose commit scope:",
-		Options: []string{}, // TODO: use preset options from config
-		// Default:
-	},
-}
-
 var cmtScopeInput = &survey.Question{
 	Name: "scope",
 	Prompt: &survey.Input{
@@ -366,23 +348,56 @@ var commitCmd = &cobra.Command{
 			var cmtMsg CommitMsg
 			var questions = []*survey.Question{}
 
-			questions = append(questions, cmtTypeSelect) // required
-
-			if prompt := viper.GetBool("gitwok.commit.prompt.scope"); prompt {
-				questions = append(questions, cmtScopeInput)
+			// prompt type
+			var typeOptions []string
+			if options := viper.GetStringSlice("gitwok.commit.type"); len(options) != 0 {
+				typeOptions = options
+			} else {
+				typeOptions = PresetCommitTypes
 			}
+
+			questions = append(questions, &survey.Question{
+				Name: "type",
+				Prompt: &survey.Select{
+					Message: "Choose commit type:",
+					Options: typeOptions,
+					Default: typeOptions[0],
+				},
+			})
+
+			// prompt scope
+			if prompt := viper.GetBool("gitwok.commit.prompt.scope"); prompt {
+				if options := viper.GetStringSlice("gitwok.commit.scope"); len(options) != 0 {
+					var cmtScopeSelect = &survey.Question{
+						Name: "scope",
+						Prompt: &survey.Select{
+							Message: "Choose commit scope:",
+							Options: options,
+							Default: options[0],
+						},
+					}
+					questions = append(questions, cmtScopeSelect)
+				} else {
+					questions = append(questions, cmtScopeInput)
+				}
+			}
+
+			// prompt breaking
 			if prompt := viper.GetBool("gitwok.commit.prompt.breaking"); prompt {
 				questions = append(questions, cmtBrkConfirm)
 			}
 
-			questions = append(questions, cmtDescInput) // required
+			// prompt description
+			questions = append(questions, cmtDescInput)
 
+			// prompt body
 			if prompt := viper.GetBool("gitwok.commit.prompt.body"); prompt {
 				questions = append(questions, cmtBodyMulti)
 			}
 
 			must(survey.Ask(questions, &cmtMsg))
 
+			// prompt footers
 			if prompt := viper.GetBool("gitwok.commit.prompt.footers"); prompt {
 				var ft CommitFooters
 				must(survey.Ask(FootersQuestions, &ft))

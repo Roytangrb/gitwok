@@ -8,11 +8,8 @@ gitwok:
     type:
       - fix
       - feat
-      - build
       - chore
-      - ci
       - docs
-      - perf
       - refactor
       - style
       - test
