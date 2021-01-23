@@ -45,13 +45,17 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&isVerbose, "verbose", "v", false, "verbose output")
 }
 
-func initConfig() {
+func initDefaults() {
 	viper.SetDefault("gitwok.commit.prompt.scope", true)
 	viper.SetDefault("gitwok.commit.prompt.breaking", true)
 	viper.SetDefault("gitwok.commit.prompt.body", true)
 	viper.SetDefault("gitwok.commit.prompt.footers", true)
 	viper.SetDefault("gitwok.commit.type", PresetCommitTypes)
 	viper.SetDefault("gitwok.commit.scope", []string{})
+}
+
+func initConfig() {
+	initDefaults()
 
 	if isVerbose {
 		logger.VerboseEnabled = true

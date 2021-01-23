@@ -19,20 +19,20 @@ func TestContainsNewline(t *testing.T) {
 func TestMakeCommitMsg(t *testing.T) {
 	msg := makeCommitMsg(" fix ", " lib ", false, " desc\r\n", " bodyln1\n bodyln2\n", []string{" Acked-by: RT \n", "Review-by: RT2\r\n", " #1", "Reviewed: "})
 
-	var tests = []TestStrInOut{
-		{msg.Type, "fix"},
-		{msg.Scope, "lib"},
-		{msg.Description, "desc"},
-		{msg.Body, "bodyln1\n bodyln2"},
-		{msg.Footers[0], "Acked-by: RT"},
-		{msg.Footers[1], "Review-by: RT2"},
-		{msg.Footers[2], " #1"},
-		{msg.Footers[3], "Reviewed: "},
+	var tests = []TestStr{
+		{msg.Type, "fix", ""},
+		{msg.Scope, "lib", ""},
+		{msg.Description, "desc", ""},
+		{msg.Body, "bodyln1\n bodyln2", ""},
+		{msg.Footers[0], "Acked-by: RT", ""},
+		{msg.Footers[1], "Review-by: RT2", ""},
+		{msg.Footers[2], " #1", ""},
+		{msg.Footers[3], "Reviewed: ", ""},
 	}
 
 	for _, test := range tests {
-		if got, expected := test.in, test.out; got != expected {
-			t.Errorf("makeCommitMsg failed, expected: %q, got: %q", expected, got)
+		if test.got != test.expected {
+			t.Errorf("makeCommitMsg failed, expected: %q, got: %q", test.expected, test.got)
 		}
 	}
 }
@@ -73,16 +73,16 @@ func TestCommitMsgHeader(t *testing.T) {
 	}
 
 	// test CommitMsg.ToString
-	var tests = []TestStrInOut{
-		{makeCommitMsg(" docs ", "", false, "fix typo", "", []string{}).ToString(), "docs: fix typo" + NL},                       // test type trim
-		{makeCommitMsg("docs", " READ ME.md ", false, "fix typo", "", []string{}).ToString(), "docs(READ ME.md): fix typo" + NL}, // test scope trim
-		{makeCommitMsg("docs", "", true, "fix typo", "", []string{}).ToString(), "docs!: fix typo" + NL},
-		{makeCommitMsg("fix", "lib", true, "fix bug", "", []string{}).ToString(), "fix(lib)!: fix bug" + NL},
+	var tests = []TestStr{
+		{makeCommitMsg(" docs ", "", false, "fix typo", "", []string{}).ToString(), "docs: fix typo" + NL, ""},                       // test type trim
+		{makeCommitMsg("docs", " READ ME.md ", false, "fix typo", "", []string{}).ToString(), "docs(READ ME.md): fix typo" + NL, ""}, // test scope trim
+		{makeCommitMsg("docs", "", true, "fix typo", "", []string{}).ToString(), "docs!: fix typo" + NL, ""},
+		{makeCommitMsg("fix", "lib", true, "fix bug", "", []string{}).ToString(), "fix(lib)!: fix bug" + NL, ""},
 	}
 
 	for _, test := range tests {
-		if got, expected := test.in, test.out; got != expected {
-			t.Errorf("CommitMsg.ToString for header failed, expected: %q, got: %q", expected, got)
+		if test.got != test.expected {
+			t.Errorf("CommitMsg.ToString for header failed, expected: %q, got: %q", test.expected, test.got)
 		}
 	}
 }
@@ -133,16 +133,16 @@ fix #1
 		t.Errorf("MatchFooters failed, empty input expected matched %d, matched %d, %v", 4, len(footers), footers)
 	}
 
-	var tests = []TestStrInOut{
-		{footers[0], "Acked-By: RT fix readme" + NL + "with second line"},
-		{footers[1], "Reviewed-By: RT"},
-		{footers[2], "fix #1"},
-		{footers[3], "BREAKING CHANGE: asdf"},
+	var tests = []TestStr{
+		{footers[0], "Acked-By: RT fix readme" + NL + "with second line", ""},
+		{footers[1], "Reviewed-By: RT", ""},
+		{footers[2], "fix #1", ""},
+		{footers[3], "BREAKING CHANGE: asdf", ""},
 	}
 
 	for _, test := range tests {
-		if got, expected := test.in, test.out; got != expected {
-			t.Errorf("MatchFooters failed, expected: %q, got: %q", expected, got)
+		if test.got != test.expected {
+			t.Errorf("MatchFooters failed, expected: %q, got: %q", test.expected, test.got)
 		}
 	}
 }
@@ -167,19 +167,19 @@ func TestParseFooter(t *testing.T) {
 }
 
 func TestTrimFooter(t *testing.T) {
-	var tests = []TestStrInOut{
-		{" re #1 ", "re #1"},
-		{"Reviewed-by: some author " + NL, "Reviewed-by: some author"},
-		{"Acked-by: ", "Acked-by: "},
-		{"BREAKING CHANGE: ", "BREAKING CHANGE: "},
+	var tests = []TestStr{
+		{TrimFooter(" re #1 "), "re #1", ""},
+		{TrimFooter("Reviewed-by: some author " + NL), "Reviewed-by: some author", ""},
+		{TrimFooter("Acked-by: "), "Acked-by: ", ""},
+		{TrimFooter("BREAKING CHANGE: "), "BREAKING CHANGE: ", ""},
 		// preserver separators
-		{"  #1 ", " #1"},
-		{" Reviewed-by:   ", "Reviewed-by: "},
+		{TrimFooter("  #1 "), " #1", ""},
+		{TrimFooter(" Reviewed-by:   "), "Reviewed-by: ", ""},
 	}
 
 	for _, test := range tests {
-		if got, expected := TrimFooter(test.in), test.out; got != expected {
-			t.Errorf("TrimFooter failed, expected: %q, got: %q", expected, got)
+		if test.got != test.expected {
+			t.Errorf("TrimFooter failed, expected: %q, got: %q", test.expected, test.got)
 		}
 	}
 }

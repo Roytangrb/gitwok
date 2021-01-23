@@ -2,26 +2,29 @@ package cmd
 
 import "testing"
 
-type TestStrInOut struct {
-	in  string
-	out string
+// TestStr string test helper struct
+// put err field the last as optional
+type TestStr struct {
+	got      string
+	expected string
+	msg      string
 }
 
 func TestTranslateNotStaged(t *testing.T) {
-	var tests = []TestStrInOut{
-		{CodeAddedNotStaged, "added"},
-		{CodeModifiedNotStaged, "modified"},
-		{CodeDeletedNotStaged, "deleted"},
-		{CodeRenamedNotStaged, "renamed"},
-		{CodeCopiedNotStaged, "copied"},
-		{CodeUntracked, "untracked"},
-		{"M ", "unknown"},
-		{"D ", "unknown"},
+	var tests = []TestStr{
+		{translateNotStaged(CodeAddedNotStaged), "added", ""},
+		{translateNotStaged(CodeModifiedNotStaged), "modified", ""},
+		{translateNotStaged(CodeDeletedNotStaged), "deleted", ""},
+		{translateNotStaged(CodeRenamedNotStaged), "renamed", ""},
+		{translateNotStaged(CodeCopiedNotStaged), "copied", ""},
+		{translateNotStaged(CodeUntracked), "untracked", ""},
+		{translateNotStaged("M "), "unknown", ""},
+		{translateNotStaged("D "), "unknown", ""},
 	}
 
 	for _, test := range tests {
-		if got, expected := translateNotStaged(test.in), test.out; got != expected {
-			t.Errorf("translateNotStaged failed, expected: %s, got: %s", expected, got)
+		if test.got != test.expected {
+			t.Errorf("translateNotStaged failed, expected: %s, got: %s", test.expected, test.got)
 		}
 	}
 }
