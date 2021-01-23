@@ -189,6 +189,7 @@ func MatchFooters(str string) []string {
 	indices := re.FindAllStringIndex(str, -1)
 
 	if indices == nil {
+		// When no match found, warn if input not empty, see CommitFooters.WriteAnswer
 		logger.Warn("No valid footer message found")
 		return []string{}
 	}
