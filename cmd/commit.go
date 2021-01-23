@@ -303,11 +303,12 @@ func (cm *CommitMsg) ToString() string {
 }
 
 // Commit validate and git commit the CommitMsg
-func (cm *CommitMsg) Commit() {
+func (cm *CommitMsg) Commit(git *Git) {
 	if ok, msg := cm.Validate(); ok {
 		cmtMsgStr := cm.ToString()
 		logger.Verbose(fmt.Sprintln("Executing git commit -m with msg: ") + cmtMsgStr)
-		GitCommit(cmtMsgStr)
+
+		git.Commit("-m", cmtMsgStr)
 	} else {
 		logger.Fatal(msg)
 	}
@@ -380,6 +381,11 @@ var commitCmd = &cobra.Command{
 	Short: "build and make conventional commit",
 	Long:  "Pass no flag to use interactive mode or build commit message with flags",
 	Run: func(cmd *cobra.Command, args []string) {
+		var git = &Git{
+			verbose: false,
+			dryRun:  mustBool(cmd.Flags().GetBool("dry-run")),
+		}
+
 		// count local flags set explicitly
 		// cobra issue: https://github.com/spf13/cobra/issues/1315
 		flagCount := 0
@@ -401,11 +407,11 @@ var commitCmd = &cobra.Command{
 
 			// try construct commit msg from flags
 			cmtMsg := makeCommitMsg(cmtType, cmtScope, cmtHasBrkChange, cmtDescription, cmtBody, cmtFooters)
-			cmtMsg.Commit()
+			cmtMsg.Commit(git)
 		} else {
 			var cmtMsg CommitMsg
 			cmtMsg.Prompt()
-			cmtMsg.Commit()
+			cmtMsg.Commit(git)
 		}
 	},
 }

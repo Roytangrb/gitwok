@@ -15,9 +15,13 @@ type Git struct {
 	dryRun  bool
 }
 
+// hasDryRunFlag check if "--dry-run" is passed in already
+// caveats: "-n" is not checked because it could mean sth else
+// i.e. in git commit "-n" means "--no-verify"
+// "--dry-run" should be passed in instead of "-n"
 func hasDryRunFlag(args []string) bool {
 	for _, arg := range args {
-		if arg == "-n" || arg == "--dry-run" {
+		if arg == "--dry-run" {
 			return true
 		}
 	}
@@ -33,6 +37,7 @@ func (git *Git) Add(args ...string) {
 	if !hasDryRunFlag(args) && git.dryRun {
 		args = prependArg("--dry-run", args)
 	}
+
 	cmd := exec.Command(GitExec, prependArg("add", args)...)
 	must(cmd.Run())
 }
@@ -42,20 +47,24 @@ func (git *Git) Rm(args ...string) {
 	if !hasDryRunFlag(args) && git.dryRun {
 		args = prependArg("--dry-run", args)
 	}
+
 	cmd := exec.Command(GitExec, prependArg("rm", args)...)
 	must(cmd.Run())
 }
 
-// GitCommit exec `git commit -m`
-func GitCommit(msg string) {
-	cmd := exec.Command(GitExec, "commit", "-m", msg)
+// Commit exec `git commit <args>`
+func (git *Git) Commit(args ...string) {
+	if !hasDryRunFlag(args) && git.dryRun {
+		args = prependArg("--dry-run", args)
+	}
+	cmd := exec.Command(GitExec, prependArg("commit", args)...)
+
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
 
 	// print output, delay exit on error
-	logger.Info("git commit -m output:")
-	fmt.Println(out.String())
+	logger.Verbose(fmt.Sprintln("git commit output:") + out.String())
 
 	must(err)
 }
