@@ -306,10 +306,7 @@ func (cm *CommitMsg) ToString() string {
 func (cm *CommitMsg) Commit() {
 	if ok, msg := cm.Validate(); ok {
 		cmtMsgStr := cm.ToString()
-		if isVerbose {
-			logger.Verbose("Executing git commit -m with msg: ")
-			fmt.Print(cmtMsgStr)
-		}
+		logger.Verbose(fmt.Sprintln("Executing git commit -m with msg: ") + cmtMsgStr)
 		GitCommit(cmtMsgStr)
 	} else {
 		logger.Fatal(msg)

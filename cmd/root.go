@@ -15,11 +15,6 @@ const VersionTmpl = `
 {{- .Name}} {{.Version}}
 `
 
-var (
-	cfgFile   string
-	isVerbose bool
-)
-
 var logger *util.Logger = util.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 
 // rootCmd represents the base command when called without any subcommands
@@ -37,12 +32,12 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initDefaults, readConfig)
 
 	rootCmd.SetVersionTemplate(VersionTmpl)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./gitwok.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&isVerbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().String("config", "", "config file (default is ./gitwok.yaml)")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 }
 
 func initDefaults() {
@@ -54,16 +49,12 @@ func initDefaults() {
 	viper.SetDefault("gitwok.commit.scope", []string{})
 }
 
-func initConfig() {
-	initDefaults()
+func readConfig() {
+	logger.VerboseEnabled = mustBool(rootCmd.Flags().GetBool("verbose"))
 
-	if isVerbose {
-		logger.VerboseEnabled = true
-	}
-
-	if cfgFile != "" {
+	if fp := mustStr(rootCmd.Flags().GetString("config")); fp != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(fp)
 	} else {
 		// Find home directory.
 		home := mustStr(homedir.Dir())

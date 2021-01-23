@@ -28,8 +28,9 @@ func CompareStrSlices(s1 []string, s2 []string) bool {
 func TestInitDefaults(t *testing.T) {
 	// reset all to default settings
 	viper.Reset()
-	initDefaults()
 	// test default values
+	initDefaults()
+
 	var boolTests = []TestBool{
 		{viper.GetBool("gitwok.commit.prompt.scope"), true, "scope prompt"},
 		{viper.GetBool("gitwok.commit.prompt.breaking"), true, "breaking prompt"},
@@ -43,5 +44,20 @@ func TestInitDefaults(t *testing.T) {
 		if test.got != test.expected {
 			t.Errorf("Config default %s failed, expected: %t, got: %t", test.msg, test.expected, test.got)
 		}
+	}
+}
+
+func TestReadConfig(t *testing.T) {
+	// reset rootCmd
+	rootCmd.ResetCommands()
+	rootCmd.ResetFlags()
+	logger.VerboseEnabled = false
+	// test config read
+	// rootCmd.Flags().Set("verbose", "true")
+	// rootCmd.Flags().Set("config", "../gitwok.yaml")
+	// readConfig()
+
+	if got, expected := logger.VerboseEnabled, false; got != expected {
+		t.Errorf("Set logger verbose by flag failed, expected: %t, got: %t", expected, got)
 	}
 }
