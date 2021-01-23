@@ -9,21 +9,40 @@ import (
 // GitExec git executable name
 const GitExec = "git"
 
-// GitAdd exec `git add <filepath>`
-func GitAdd(fp string) {
-	cmd := exec.Command(GitExec, "add", fp)
+// Git with methods to exec git commands
+type Git struct {
+	verbose bool
+	dryRun  bool
+}
+
+func hasDryRunFlag(args []string) bool {
+	for _, arg := range args {
+		if arg == "-n" || arg == "--dry-run" {
+			return true
+		}
+	}
+	return false
+}
+
+func prependArg(arg string, args []string) []string {
+	return append([]string{arg}, args...)
+}
+
+// Add exec `git add <args>`
+func (git *Git) Add(args ...string) {
+	if !hasDryRunFlag(args) && git.dryRun {
+		args = prependArg("--dry-run", args)
+	}
+	cmd := exec.Command(GitExec, prependArg("add", args)...)
 	must(cmd.Run())
 }
 
-// GitAddAll exec `git add .`
-func GitAddAll() {
-	cmd := exec.Command(GitExec, "add", ".")
-	must(cmd.Run())
-}
-
-// GitRm exec `git rm` to stage changes of a deleted file
-func GitRm(fp string) {
-	cmd := exec.Command(GitExec, "rm", fp)
+// Rm exec `git rm` to stage changes of a deleted file
+func (git *Git) Rm(args ...string) {
+	if !hasDryRunFlag(args) && git.dryRun {
+		args = prependArg("--dry-run", args)
+	}
+	cmd := exec.Command(GitExec, prependArg("rm", args)...)
 	must(cmd.Run())
 }
 

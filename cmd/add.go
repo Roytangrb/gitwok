@@ -109,8 +109,13 @@ var addCmd = &cobra.Command{
 	Short: "stage changes",
 	Long:  "stage changes with prompt and select",
 	Run: func(cmd *cobra.Command, args []string) {
+		var git = &Git{
+			verbose: false,
+			dryRun:  mustBool(cmd.Flags().GetBool("dry-run")),
+		}
+
 		if mustBool(cmd.LocalFlags().GetBool("all")) {
-			GitAddAll()
+			git.Add(".")
 			return
 		}
 
@@ -141,10 +146,10 @@ var addCmd = &cobra.Command{
 				fp := fpDict[label]
 
 				if code == CodeDeletedNotStaged {
-					GitRm(fp)
+					git.Rm(fp)
 				} else {
 					if _, err := os.Stat(fp); err == nil {
-						GitAdd(fp)
+						git.Add(fp)
 					} else {
 						logger.Warn(err)
 					}

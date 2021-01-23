@@ -38,6 +38,7 @@ func init() {
 
 	rootCmd.PersistentFlags().String("config", "", "config file (default is ./gitwok.yaml)")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolP("dry-run", "n", false, "dry run all git exec actions")
 }
 
 func initDefaults() {
