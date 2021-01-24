@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-var NL = fmt.Sprintln()
-
 func TestContainsNewline(t *testing.T) {
 	if !ContainsNewline(fmt.Sprintln()) {
 		t.Error("ContainsNewline check failed")

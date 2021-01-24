@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -69,14 +68,9 @@ var UnstagedShortCodes = []string{
 
 // @return []string codes unstaged file short code status
 // @return []string filepaths unstaged filepaths
-func findUnstaged() ([]string, []string) {
-	cmd := exec.Command(GitExec, "status", "--short")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	must(cmd.Run())
-
+func findUnstaged(out *bytes.Buffer) ([]string, []string) {
 	// scanner by default read by newlines
-	scanner := bufio.NewScanner(&out)
+	scanner := bufio.NewScanner(out)
 	lines := []string{}
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -119,7 +113,8 @@ var addCmd = &cobra.Command{
 			return
 		}
 
-		codes, filepaths := findUnstaged()
+		var out bytes.Buffer = git.Status("--short")
+		codes, filepaths := findUnstaged(&out)
 		if len(filepaths) > 0 {
 			codeDict := make(map[string]string)
 			fpDict := make(map[string]string)

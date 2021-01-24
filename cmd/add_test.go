@@ -2,14 +2,6 @@ package cmd
 
 import "testing"
 
-// TestStr string test helper struct
-// put err field the last as optional
-type TestStr struct {
-	got      string
-	expected string
-	msg      string
-}
-
 func TestTranslateNotStaged(t *testing.T) {
 	var tests = []TestStr{
 		{translateNotStaged(CodeAddedNotStaged), "added", ""},

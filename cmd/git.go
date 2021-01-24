@@ -32,6 +32,16 @@ func prependArg(arg string, args []string) []string {
 	return append([]string{arg}, args...)
 }
 
+// Status exec `git status <args>` and return stdout as bytes.Buffer
+func (git *Git) Status(args ...string) bytes.Buffer {
+	cmd := exec.Command(GitExec, prependArg("status", args)...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	must(cmd.Run())
+
+	return out
+}
+
 // Add exec `git add <args>`
 func (git *Git) Add(args ...string) {
 	if !hasDryRunFlag(args) && git.dryRun {

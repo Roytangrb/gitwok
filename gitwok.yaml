@@ -16,6 +16,7 @@ gitwok:
     scope:
       - add
       - commit
+      - git
       - readme.md
       - release
       - root

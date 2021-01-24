@@ -1,10 +1,22 @@
 package cmd
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/spf13/viper"
 )
+
+// NL newline string shorthand for testing
+var NL = fmt.Sprintln()
+
+// TestStr string test helper struct
+// put err field the last as optional
+type TestStr struct {
+	got      string
+	expected string
+	msg      string
+}
 
 type TestBool struct {
 	got      bool
