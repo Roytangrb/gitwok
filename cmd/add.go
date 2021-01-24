@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"os"
 	"strings"
 
@@ -68,9 +69,9 @@ var UnstagedShortCodes = []string{
 
 // @return []string codes unstaged file short code status
 // @return []string filepaths unstaged filepaths
-func findUnstaged(out *bytes.Buffer) ([]string, []string) {
+func findUnstaged(r io.Reader) ([]string, []string) {
 	// scanner by default read by newlines
-	scanner := bufio.NewScanner(out)
+	scanner := bufio.NewScanner(r)
 	lines := []string{}
 	for scanner.Scan() {
 		line := scanner.Text()
