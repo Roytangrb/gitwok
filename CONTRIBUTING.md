@@ -18,9 +18,10 @@ First, fork and clone this repo to your local `$GOPATH/src/gitwok`, (with go mod
 
 ### Run
 ```
-$ go run main.go <subcommands> <flags> [-v]
+$ go run main.go [-v] [-n] <subcommands> <flags>
 ```
-use `--verboes` or `-v` flag for debug verbose ouput
+* use `--verbose` or `-v` flag for debug verbose ouput
+* use `--dry-run` or `-n` flag to dry-run git actions
 
 ### Build
 ```

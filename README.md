@@ -63,6 +63,28 @@ $ brew install gitwok
 
 ## Usage
 
+```
+Usage:
+  gitwok [flags]
+  gitwok [command]
+
+Available Commands:
+  add         stage changes
+  commit      build and make conventional commit
+  help        Help about any command
+  version     print version
+
+Flags:
+      --config string   config file (default is ./gitwok.yaml)
+  -n, --dry-run         dry run all git exec actions
+  -h, --help            help for gitwok
+  -v, --verbose         verbose output
+
+Use "gitwok [command] --help" for more information about a command.
+```
+
+> For git related commands, you may run `gitwok [command] [--verbose | -v] [--dry-run | -n]` to see verbose output without actually applying changes.
+
 ### `add` command
 
 The add subcommand prompts for selecting unstaged changes of the current directory to be added for commiting.
@@ -83,7 +105,7 @@ $ gitwok commit -t docs -s readme.md -d "commit command usage"
 ```
 which commits with a simple and valid message:
 ```
-$ docs(readme.md): commit command usage
+docs(readme.md): commit command usage
 ```
 You can check all flags by `gitwok commit --help`
 
